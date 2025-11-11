@@ -1,0 +1,181 @@
+﻿<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Gestionar Docentes - Admin</title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+  <nav class="navbar">
+    <div class="nav-container">
+      <h1> TechnoAcademy - Admin</h1>
+      <ul class="nav-menu">
+        <li><a href="/admin/dashboard">Dashboard</a></li>
+        <li><a href="/admin/alumnos">Alumnos</a></li>
+        <li><a href="/admin/docentes" class="active">Docentes</a></li>
+        <li><a href="/admin/carreras">Carreras</a></li>
+        <li><a href="/admin/materias">Materias</a></li>
+        <li><a href="/admin/periodos">Períodos</a></li>
+        <li><a href="/logout">Cerrar Sesión</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <div class="container">
+    <div id="notification" style="display:none;padding:1rem;border-radius:5px;margin-bottom:1rem;"></div>
+
+    <h2> Gestionar Docentes</h2>
+
+    <div style="margin-bottom:2rem;">
+      <input type="text" id="searchInput" placeholder=" Buscar por nombre, email o especialidad..." 
+             style="width:100%;max-width:500px;padding:0.75rem;border:1px solid #c8d0d8;border-radius:5px;font-size:1rem;">
+    </div>
+
+    <div class="form-section">
+      <h3> Crear Nuevo Docente</h3>
+      <form id="docenteForm" style="display:grid;grid-template-columns:repeat(2,1fr);gap:1rem;">
+        <div class="form-group">
+          <label for="nombre_usuario">Usuario: *</label>
+          <input type="text" id="nombre_usuario" required placeholder="Ej: docente2025" minlength="4">
+          <small>Mínimo 4 caracteres</small>
+        </div>
+
+        <div class="form-group">
+          <label for="contrasena">Contraseña: *</label>
+          <input type="password" id="contrasena" required placeholder="Mínimo 6 caracteres" minlength="6">
+          <small>Mínimo 6 caracteres</small>
+        </div>
+
+        <div class="form-group">
+          <label for="nombres">Nombres: *</label>
+          <input type="text" id="nombres" required placeholder="Ej: Juan Carlos">
+        </div>
+
+        <div class="form-group">
+          <label for="apellidos">Apellidos: *</label>
+          <input type="text" id="apellidos" required placeholder="Ej: García López">
+        </div>
+
+        <div class="form-group">
+          <label for="email">Email: *</label>
+          <input type="email" id="email" required placeholder="docente@university.edu">
+        </div>
+
+        <div class="form-group">
+          <label for="telefono">Teléfono:</label>
+          <input type="tel" id="telefono" placeholder="Ej: 2222-2222">
+        </div>
+
+        <div class="form-group">
+          <label for="especialidad">Especialidad:</label>
+          <input type="text" id="especialidad" placeholder="Ej: Matemáticas, Programación">
+        </div>
+
+        <div class="form-group">
+          <label for="fecha_contratacion">Fecha Contratación:</label>
+          <input type="date" id="fecha_contratacion">
+        </div>
+
+        <div style="grid-column:1/-1;display:flex;gap:1rem;">
+          <button type="submit" class="btn btn-primary">
+            <span id="btn-crear-text"> Crear Docente</span>
+            <span id="btn-crear-loader" style="display:none;"> Creando...</span>
+          </button>
+          <button type="reset" class="btn btn-secondary"> Limpiar</button>
+        </div>
+      </form>
+    </div>
+
+    <hr>
+
+    <div class="table-section">
+      <h3> Docentes del Sistema</h3>
+      <div style="overflow-x:auto;">
+        <table class="table">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Nombre Completo</th>
+              <th>Email</th>
+              <th>Teléfono</th>
+              <th>Especialidad</th>
+              <th>Usuario</th>
+              <th>Estado</th>
+              <th>Acciones</th>
+            </tr>
+          </thead>
+          <tbody id="docentesTable">
+            <tr>
+              <td colspan="8" style="text-align:center;"> Cargando docentes...</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <div id="editModal" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.5);z-index:1000;justify-content:center;align-items:center;">
+    <div style="background:white;padding:0;border-radius:10px;max-width:600px;width:90%;max-height:90vh;overflow-y:auto;">
+      <div style="display:flex;justify-content:space-between;align-items:center;padding:1.5rem;border-bottom:1px solid #eee;">
+        <h3 style="margin:0;color:#1e3c72;"> Editar Docente</h3>
+        <span onclick="cerrarModal()" style="font-size:2rem;cursor:pointer;color:#666;line-height:1;">&times;</span>
+      </div>
+      <form id="editForm" style="padding:1.5rem;display:grid;grid-template-columns:repeat(2,1fr);gap:1rem;">
+        <input type="hidden" id="edit_id_docente">
+        
+        <div class="form-group">
+          <label for="edit_nombres">Nombres: *</label>
+          <input type="text" id="edit_nombres" required>
+        </div>
+
+        <div class="form-group">
+          <label for="edit_apellidos">Apellidos: *</label>
+          <input type="text" id="edit_apellidos" required>
+        </div>
+
+        <div class="form-group">
+          <label for="edit_email">Email: *</label>
+          <input type="email" id="edit_email" required>
+        </div>
+
+        <div class="form-group">
+          <label for="edit_telefono">Teléfono:</label>
+          <input type="tel" id="edit_telefono">
+        </div>
+
+        <div class="form-group">
+          <label for="edit_especialidad">Especialidad:</label>
+          <input type="text" id="edit_especialidad">
+        </div>
+
+        <div class="form-group">
+          <label for="edit_estado">Estado:</label>
+          <select id="edit_estado" required>
+            <option value="ACTIVO">Activo</option>
+            <option value="INACTIVO">Inactivo</option>
+          </select>
+        </div>
+
+        <div style="grid-column:1/-1;border-top:1px solid #eee;padding-top:1rem;display:flex;gap:1rem;justify-content:flex-end;">
+          <button type="button" class="btn btn-secondary" onclick="cerrarModal()"> Cancelar</button>
+          <button type="submit" class="btn btn-primary"> Guardar Cambios</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script src="/js/admin/docentes.js"></script>
+  <style>
+    .notification.success{background:#d4edda;border-left:4px solid #28a745;color:#155724;}
+    .notification.error{background:#f8d7da;border-left:4px solid #dc3545;color:#721c24;}
+    .badge{padding:4px 10px;border-radius:12px;font-size:0.85rem;font-weight:500;}
+    .badge-success{background:#d4edda;color:#155724;}
+    .badge-inactive{background:#f8d7da;color:#721c24;}
+    .btn-small{padding:0.4rem 0.8rem;font-size:0.85rem;margin-right:0.3rem;}
+    .btn-warning{background:#ffc107;color:#000;}
+    .btn-warning:hover{background:#e0a800;}
+    .nav-menu a.active{background:#fff;color:#1e3c72;font-weight:bold;}
+  </style>
+</body>
+</html>

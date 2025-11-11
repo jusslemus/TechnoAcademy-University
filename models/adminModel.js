@@ -114,10 +114,11 @@ async function eliminarUsuario(id_usuario) {
 async function getAlumnos() {
   try {
     const alumnos = await db.fetchQuery(
-      `SELECT a.id_alumno, a.carnet, a.nombres, a.apellidos, a.email, a.carrera, 
-              a.estado_academico, a.fecha_ingreso, u.nombre_usuario
+      `SELECT a.id_alumno, a.carnet, a.nombres, a.apellidos, a.email, a.telefono,
+              a.fecha_nacimiento, a.direccion, a.carrera, a.estado_academico as estado, 
+              a.fecha_ingreso, a.id_usuario, u.nombre_usuario
        FROM alumnos a
-       JOIN usuarios u ON a.id_usuario = u.id_usuario
+       LEFT JOIN usuarios u ON a.id_usuario = u.id_usuario
        ORDER BY a.carnet`
     );
     return alumnos;
@@ -127,58 +128,183 @@ async function getAlumnos() {
   }
 }
 
-// Crear alumno
+// Crear alumno (con usuario)
 async function crearAlumno(datos) {
+  const bcrypt = require('bcryptjs');
   let connection;
+  
   try {
     connection = await db.getConnection();
-
-    // Crear usuario
-    const resUser = await connection.execute(
+    
+    // 1. Crear usuario
+    const contrasenaHasheada = await bcrypt.hash(datos.contrasena, 10);
+    const resultUsuario = await connection.execute(
       `INSERT INTO usuarios (nombre_usuario, contrasena, tipo_usuario) 
-       VALUES (:nombre_usuario, :contrasena, :tipo_usuario)
+       VALUES (:nombre_usuario, :contrasena, 'ALUMNO')
        RETURNING id_usuario INTO :id_usuario`,
       {
         nombre_usuario: datos.nombre_usuario,
-        contrasena: datos.contrasena,
-        tipo_usuario: 'ALUMNO',
-        id_usuario: new oracledb.OutParam(oracledb.DB_TYPE_NUMBER)
-      }
+        contrasena: contrasenaHasheada,
+        id_usuario: { dir: db.oracledb.BIND_OUT, type: db.oracledb.NUMBER }
+      },
+      { autoCommit: false }
     );
-
-    const id_usuario = resUser.outBinds.id_usuario[0];
-
-    // Crear alumno
+    
+    const id_usuario = resultUsuario.outBinds.id_usuario[0];
+    
+    // 2. Crear alumno
     await connection.execute(
       `INSERT INTO alumnos (id_usuario, carnet, nombres, apellidos, email, telefono, 
                            fecha_nacimiento, direccion, carrera)
        VALUES (:id_usuario, :carnet, :nombres, :apellidos, :email, :telefono, 
                :fecha_nacimiento, :direccion, :carrera)`,
       {
-        id_usuario,
+        id_usuario: id_usuario,
         carnet: datos.carnet,
         nombres: datos.nombres,
         apellidos: datos.apellidos,
         email: datos.email,
         telefono: datos.telefono || null,
-        fecha_nacimiento: datos.fecha_nacimiento || null,
+        fecha_nacimiento: datos.fecha_nacimiento ? new Date(datos.fecha_nacimiento) : null,
         direccion: datos.direccion || null,
         carrera: datos.carrera || null
-      }
+      },
+      { autoCommit: false }
     );
-
+    
     await connection.commit();
-    console.log(`✅ Alumno creado: ${datos.carnet}`);
+    console.log(`✅ Alumno creado: ${datos.carnet} - ${datos.nombres} ${datos.apellidos}`);
     return { success: true, id_usuario };
   } catch (err) {
     if (connection) {
-      await connection.rollback();
+      try {
+        await connection.rollback();
+      } catch (rollbackErr) {
+        console.error('Error en rollback:', rollbackErr);
+      }
     }
     console.error('Error creando alumno:', err);
     throw err;
   } finally {
     if (connection) {
-      await connection.close();
+      try {
+        await connection.close();
+      } catch (closeErr) {
+        console.error('Error cerrando conexión:', closeErr);
+      }
+    }
+  }
+}
+
+// Editar alumno
+async function editarAlumno(id_alumno, datos) {
+  try {
+    const campos = [];
+    const params = { id_alumno: parseInt(id_alumno) };
+    
+    if (datos.carnet) {
+      campos.push('carnet = :carnet');
+      params.carnet = datos.carnet;
+    }
+    if (datos.nombres) {
+      campos.push('nombres = :nombres');
+      params.nombres = datos.nombres;
+    }
+    if (datos.apellidos) {
+      campos.push('apellidos = :apellidos');
+      params.apellidos = datos.apellidos;
+    }
+    if (datos.email) {
+      campos.push('email = :email');
+      params.email = datos.email;
+    }
+    if (datos.telefono !== undefined) {
+      campos.push('telefono = :telefono');
+      params.telefono = datos.telefono || null;
+    }
+    if (datos.fecha_nacimiento !== undefined) {
+      campos.push('fecha_nacimiento = :fecha_nacimiento');
+      params.fecha_nacimiento = datos.fecha_nacimiento ? new Date(datos.fecha_nacimiento) : null;
+    }
+    if (datos.direccion !== undefined) {
+      campos.push('direccion = :direccion');
+      params.direccion = datos.direccion || null;
+    }
+    if (datos.carrera !== undefined) {
+      campos.push('carrera = :carrera');
+      params.carrera = datos.carrera || null;
+    }
+    if (datos.estado) {
+      campos.push('estado_academico = :estado');
+      params.estado = datos.estado;
+    }
+    
+    if (campos.length === 0) {
+      throw new Error('No hay campos para actualizar');
+    }
+    
+    const query = `UPDATE alumnos SET ${campos.join(', ')} WHERE id_alumno = :id_alumno`;
+    
+    await db.executeQuery(query, params);
+    console.log(`✅ Alumno editado: ${id_alumno}`);
+  } catch (err) {
+    console.error('Error editando alumno:', err);
+    throw err;
+  }
+}
+
+// Eliminar alumno
+async function eliminarAlumno(id_alumno) {
+  let connection;
+  
+  try {
+    connection = await db.getConnection();
+    
+    // 1. Obtener id_usuario del alumno
+    const alumno = await connection.execute(
+      `SELECT id_usuario FROM alumnos WHERE id_alumno = :id_alumno`,
+      { id_alumno: parseInt(id_alumno) }
+    );
+    
+    if (alumno.rows.length === 0) {
+      throw new Error('Alumno no encontrado');
+    }
+    
+    const id_usuario = alumno.rows[0][0];
+    
+    // 2. Eliminar alumno
+    await connection.execute(
+      `DELETE FROM alumnos WHERE id_alumno = :id_alumno`,
+      { id_alumno: parseInt(id_alumno) },
+      { autoCommit: false }
+    );
+    
+    // 3. Eliminar usuario
+    await connection.execute(
+      `DELETE FROM usuarios WHERE id_usuario = :id_usuario`,
+      { id_usuario: id_usuario },
+      { autoCommit: false }
+    );
+    
+    await connection.commit();
+    console.log(`✅ Alumno eliminado: ${id_alumno}`);
+  } catch (err) {
+    if (connection) {
+      try {
+        await connection.rollback();
+      } catch (rollbackErr) {
+        console.error('Error en rollback:', rollbackErr);
+      }
+    }
+    console.error('Error eliminando alumno:', err);
+    throw err;
+  } finally {
+    if (connection) {
+      try {
+        await connection.close();
+      } catch (closeErr) {
+        console.error('Error cerrando conexión:', closeErr);
+      }
     }
   }
 }
@@ -504,6 +630,155 @@ async function crearGrupo(datos) {
   }
 }
 
+// ============ DOCENTES ============
+
+// Obtener todos los docentes
+async function getDocentes() {
+  try {
+    const docentes = await db.fetchQuery(
+      `SELECT d.id_docente, d.nombres, d.apellidos, d.email, d.telefono, 
+              d.especialidad, d.fecha_contratacion, d.estado, d.id_usuario,
+              u.nombre_usuario, u.tipo_usuario
+       FROM docentes d
+       LEFT JOIN usuarios u ON d.id_usuario = u.id_usuario
+       ORDER BY d.nombres, d.apellidos`
+    );
+    return docentes;
+  } catch (err) {
+    console.error('Error obteniendo docentes:', err);
+    throw err;
+  }
+}
+
+// Crear docente (con usuario)
+async function crearDocente(datos) {
+  const bcrypt = require('bcryptjs');
+  let connection;
+  
+  try {
+    connection = await db.getConnection();
+    
+    // 1. Crear usuario
+    const contrasenaHasheada = await bcrypt.hash(datos.contrasena, 10);
+    const resultUsuario = await connection.execute(
+      `INSERT INTO usuarios (nombre_usuario, contrasena, tipo_usuario) 
+       VALUES (:nombre_usuario, :contrasena, 'DOCENTE')
+       RETURNING id_usuario INTO :id_usuario`,
+      {
+        nombre_usuario: datos.nombre_usuario,
+        contrasena: contrasenaHasheada,
+        id_usuario: { dir: db.oracledb.BIND_OUT, type: db.oracledb.NUMBER }
+      },
+      { autoCommit: false }
+    );
+    
+    const id_usuario = resultUsuario.outBinds.id_usuario[0];
+    
+    // 2. Crear docente
+    await connection.execute(
+      `INSERT INTO docentes (id_usuario, nombres, apellidos, email, telefono, especialidad, fecha_contratacion)
+       VALUES (:id_usuario, :nombres, :apellidos, :email, :telefono, :especialidad, :fecha_contratacion)`,
+      {
+        id_usuario: id_usuario,
+        nombres: datos.nombres,
+        apellidos: datos.apellidos,
+        email: datos.email,
+        telefono: datos.telefono || null,
+        especialidad: datos.especialidad || null,
+        fecha_contratacion: datos.fecha_contratacion ? new Date(datos.fecha_contratacion) : new Date()
+      },
+      { autoCommit: false }
+    );
+    
+    await connection.commit();
+    console.log(`✅ Docente creado: ${datos.nombres} ${datos.apellidos}`);
+    return { success: true, message: 'Docente creado exitosamente', id_usuario };
+  } catch (err) {
+    if (connection) {
+      try {
+        await connection.rollback();
+      } catch (rollbackErr) {
+        console.error('Error en rollback:', rollbackErr);
+      }
+    }
+    console.error('Error creando docente:', err);
+    throw err;
+  } finally {
+    if (connection) {
+      try {
+        await connection.close();
+      } catch (closeErr) {
+        console.error('Error cerrando conexión:', closeErr);
+      }
+    }
+  }
+}
+
+// Editar docente
+async function editarDocente(id_docente, datos) {
+  try {
+    let updates = [];
+    let params = { id_docente };
+
+    if (datos.nombres) {
+      updates.push(`nombres = :nombres`);
+      params.nombres = datos.nombres;
+    }
+    if (datos.apellidos) {
+      updates.push(`apellidos = :apellidos`);
+      params.apellidos = datos.apellidos;
+    }
+    if (datos.email) {
+      updates.push(`email = :email`);
+      params.email = datos.email;
+    }
+    if (datos.telefono !== undefined) {
+      updates.push(`telefono = :telefono`);
+      params.telefono = datos.telefono;
+    }
+    if (datos.especialidad !== undefined) {
+      updates.push(`especialidad = :especialidad`);
+      params.especialidad = datos.especialidad;
+    }
+    if (datos.fecha_contratacion) {
+      updates.push(`fecha_contratacion = :fecha_contratacion`);
+      params.fecha_contratacion = datos.fecha_contratacion;
+    }
+    if (datos.estado) {
+      updates.push(`estado = :estado`);
+      params.estado = datos.estado;
+    }
+
+    if (updates.length === 0) {
+      throw new Error('No hay campos para actualizar');
+    }
+
+    const query = `UPDATE docentes SET ${updates.join(', ')} WHERE id_docente = :id_docente`;
+    await db.executeQuery(query, params);
+    
+    console.log(`✅ Docente editado: ${id_docente}`);
+    return { success: true, message: 'Docente editado exitosamente' };
+  } catch (err) {
+    console.error('Error editando docente:', err);
+    throw err;
+  }
+}
+
+// Eliminar docente
+async function eliminarDocente(id_docente) {
+  try {
+    await db.executeQuery(
+      `DELETE FROM docentes WHERE id_docente = :id_docente`,
+      { id_docente }
+    );
+    console.log(`✅ Docente eliminado: ${id_docente}`);
+    return { success: true, message: 'Docente eliminado exitosamente' };
+  } catch (err) {
+    console.error('Error eliminando docente:', err);
+    throw err;
+  }
+}
+
 module.exports = {
   getUsuarios,
   getUsuarioById,
@@ -512,6 +787,8 @@ module.exports = {
   eliminarUsuario,
   getAlumnos,
   crearAlumno,
+  editarAlumno,
+  eliminarAlumno,
   getCarreras,
   crearCarrera,
   editarCarrera,
@@ -525,5 +802,9 @@ module.exports = {
   editarPeriodo,
   eliminarPeriodo,
   getGrupos,
-  crearGrupo
+  crearGrupo,
+  getDocentes,
+  crearDocente,
+  editarDocente,
+  eliminarDocente
 };

@@ -10,9 +10,19 @@ router.get('/dashboard', (req, res) => {
   res.sendFile(path.join(__dirname, '../views/admin/dashboard.html'));
 });
 
-// Usuarios
+// Usuarios (deprecated - mantener por compatibilidad)
 router.get('/usuarios', (req, res) => {
   res.sendFile(path.join(__dirname, '../views/admin/usuarios.html'));
+});
+
+// Alumnos
+router.get('/alumnos', (req, res) => {
+  res.sendFile(path.join(__dirname, '../views/admin/alumnos.html'));
+});
+
+// Docentes
+router.get('/docentes', (req, res) => {
+  res.sendFile(path.join(__dirname, '../views/admin/docentes.html'));
 });
 
 // Carreras
@@ -316,6 +326,135 @@ router.get('/api/alumnos', async (req, res) => {
   } catch (err) {
     console.error('Error obteniendo alumnos:', err);
     res.status(500).json({ error: 'Error al obtener alumnos' });
+  }
+});
+
+router.post('/api/alumnos/crear', async (req, res) => {
+  try {
+    const { nombre_usuario, contrasena, carnet, nombres, apellidos, email, telefono, fecha_nacimiento, direccion, carrera } = req.body;
+    
+    if (!nombre_usuario || !contrasena || !carnet || !nombres || !apellidos || !email) {
+      return res.status(400).json({ error: 'Campos requeridos: nombre_usuario, contrasena, carnet, nombres, apellidos, email' });
+    }
+
+    const resultado = await adminModel.crearAlumno({
+      nombre_usuario,
+      contrasena,
+      carnet,
+      nombres,
+      apellidos,
+      email,
+      telefono,
+      fecha_nacimiento,
+      direccion,
+      carrera
+    });
+
+    res.json({ success: true, message: 'Alumno creado exitosamente', id_usuario: resultado.id_usuario });
+  } catch (err) {
+    console.error('Error creando alumno:', err);
+    if (err.errorNum === 1) {
+      res.status(400).json({ error: 'El carnet, usuario o email ya existe' });
+    } else {
+      res.status(500).json({ error: 'Error al crear alumno' });
+    }
+  }
+});
+
+router.put('/api/alumnos/:id_alumno', async (req, res) => {
+  try {
+    const { id_alumno } = req.params;
+    const { carnet, nombres, apellidos, email, telefono, fecha_nacimiento, direccion, carrera, estado } = req.body;
+
+    if (!carnet && !nombres && !apellidos && !email && !telefono && !fecha_nacimiento && !direccion && !carrera && !estado) {
+      return res.status(400).json({ error: 'Al menos un campo es requerido' });
+    }
+
+    await adminModel.editarAlumno(id_alumno, { carnet, nombres, apellidos, email, telefono, fecha_nacimiento, direccion, carrera, estado });
+    res.json({ success: true, message: 'Alumno editado exitosamente' });
+  } catch (err) {
+    console.error('Error editando alumno:', err);
+    res.status(500).json({ error: 'Error al editar alumno' });
+  }
+});
+
+router.delete('/api/alumnos/:id_alumno', async (req, res) => {
+  try {
+    const { id_alumno } = req.params;
+    await adminModel.eliminarAlumno(id_alumno);
+    res.json({ success: true, message: 'Alumno eliminado exitosamente' });
+  } catch (err) {
+    console.error('Error eliminando alumno:', err);
+    res.status(500).json({ error: 'Error al eliminar alumno' });
+  }
+});
+
+// ---- DOCENTES ----
+router.get('/api/docentes', async (req, res) => {
+  try {
+    const docentes = await adminModel.getDocentes();
+    res.json(docentes);
+  } catch (err) {
+    console.error('Error obteniendo docentes:', err);
+    res.status(500).json({ error: 'Error al obtener docentes' });
+  }
+});
+
+router.post('/api/docentes/crear', async (req, res) => {
+  try {
+    const { nombre_usuario, contrasena, nombres, apellidos, email, telefono, especialidad, fecha_contratacion } = req.body;
+    
+    if (!nombre_usuario || !contrasena || !nombres || !apellidos || !email) {
+      return res.status(400).json({ error: 'Campos requeridos' });
+    }
+
+    const resultado = await adminModel.crearDocente({
+      nombre_usuario,
+      contrasena,
+      nombres,
+      apellidos,
+      email,
+      telefono,
+      especialidad,
+      fecha_contratacion
+    });
+
+    res.json({ success: true, message: 'Docente creado exitosamente', id_usuario: resultado.id_usuario });
+  } catch (err) {
+    console.error('Error creando docente:', err);
+    if (err.errorNum === 1) {
+      res.status(400).json({ error: 'El usuario o email ya existe' });
+    } else {
+      res.status(500).json({ error: 'Error al crear docente' });
+    }
+  }
+});
+
+router.put('/api/docentes/:id_docente', async (req, res) => {
+  try {
+    const { id_docente } = req.params;
+    const { nombres, apellidos, email, telefono, especialidad, fecha_contratacion, estado } = req.body;
+
+    if (!nombres && !apellidos && !email && !telefono && !especialidad && !fecha_contratacion && !estado) {
+      return res.status(400).json({ error: 'Al menos un campo es requerido' });
+    }
+
+    await adminModel.editarDocente(id_docente, { nombres, apellidos, email, telefono, especialidad, fecha_contratacion, estado });
+    res.json({ success: true, message: 'Docente editado exitosamente' });
+  } catch (err) {
+    console.error('Error editando docente:', err);
+    res.status(500).json({ error: 'Error al editar docente' });
+  }
+});
+
+router.delete('/api/docentes/:id_docente', async (req, res) => {
+  try {
+    const { id_docente } = req.params;
+    await adminModel.eliminarDocente(id_docente);
+    res.json({ success: true, message: 'Docente eliminado exitosamente' });
+  } catch (err) {
+    console.error('Error eliminando docente:', err);
+    res.status(500).json({ error: 'Error al eliminar docente' });
   }
 });
 

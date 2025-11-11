@@ -10,6 +10,9 @@ let connectionPool;
 // Inicializar Pool
 async function initializeDB() {
   try {
+    // Configurar charset para soporte UTF-8
+    process.env.NLS_LANG = 'AMERICAN_AMERICA.AL32UTF8';
+    
     connectionPool = await oracledb.createPool({
       user: process.env.DB_USER,
       password: process.env.DB_PASSWORD,
@@ -86,5 +89,6 @@ module.exports = {
   executeQuery,
   fetchQuery,
   fetchOne,
-  closePool
+  closePool,
+  oracledb
 };
