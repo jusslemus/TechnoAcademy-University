@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="es">
 <head>
   <meta charset="UTF-8">
@@ -9,234 +9,148 @@
 <body>
   <nav class="navbar">
     <div class="nav-container">
-      <h1>🎓 TechnoAcademy - Admin</h1>
+      <h1> TechnoAcademy - Admin</h1>
       <ul class="nav-menu">
         <li><a href="/admin/dashboard">Dashboard</a></li>
         <li><a href="/admin/usuarios">Usuarios</a></li>
+        <li><a href="/admin/carreras">Carreras</a></li>
+        <li><a href="/admin/materias">Materias</a></li>
+        <li><a href="/admin/periodos">Períodos</a></li>
         <li><a href="/logout">Cerrar Sesión</a></li>
       </ul>
     </div>
   </nav>
 
   <div class="container">
-    <h2>👥 Gestionar Usuarios</h2>
+    <div id="notification" style="display:none;padding:1rem;border-radius:5px;margin-bottom:1rem;"></div>
+
+    <h2> Gestionar Usuarios</h2>
+
+    <div style="margin-bottom:2rem;">
+      <input type="text" id="searchInput" placeholder=" Buscar por usuario o tipo..." 
+             style="width:100%;max-width:400px;padding:0.75rem;border:1px solid #c8d0d8;border-radius:5px;font-size:1rem;">
+    </div>
 
     <div class="form-section">
-      <h3>Crear Nuevo Usuario</h3>
-      <form id="userForm" method="POST" action="/admin/usuarios/crear">
+      <h3> Crear Nuevo Usuario</h3>
+      <form id="userForm">
         <div class="form-group">
-          <label for="nombre_usuario">Usuario:</label>
-          <input type="text" id="nombre_usuario" name="nombre_usuario" required>
+          <label for="nombre_usuario">Usuario: *</label>
+          <input type="text" id="nombre_usuario" required placeholder="Ej: alumno2025" minlength="4">
+          <small>Mínimo 4 caracteres</small>
         </div>
 
         <div class="form-group">
-          <label for="contrasena">Contraseña:</label>
-          <input type="password" id="contrasena" name="contrasena" required>
+          <label for="contrasena">Contraseña: *</label>
+          <input type="password" id="contrasena" required placeholder="Mínimo 6 caracteres" minlength="6">
+          <small>Mínimo 6 caracteres</small>
         </div>
 
         <div class="form-group">
-          <label for="tipo_usuario">Tipo de Usuario:</label>
-          <select id="tipo_usuario" name="tipo_usuario" required>
+          <label for="confirmar_contrasena">Confirmar Contraseña: *</label>
+          <input type="password" id="confirmar_contrasena" required placeholder="Repita la contraseña">
+        </div>
+
+        <div class="form-group">
+          <label for="tipo_usuario">Tipo de Usuario: *</label>
+          <select id="tipo_usuario" required>
+            <option value="">-- Seleccione --</option>
             <option value="ALUMNO">Alumno</option>
-            <option value="ADMIN">Admin</option>
-            <option value="DOCENTE">Docente</option>
+            <option value="ADMIN">Administrador</option>
           </select>
         </div>
 
-        <button type="submit" class="btn btn-primary">Crear Usuario</button>
+        <div style="grid-column:1/-1;display:flex;gap:1rem;">
+          <button type="submit" class="btn btn-primary">
+            <span id="btn-crear-text"> Crear Usuario</span>
+            <span id="btn-crear-loader" style="display:none;">Creando...</span>
+          </button>
+          <button type="reset" class="btn btn-secondary"> Limpiar</button>
+        </div>
       </form>
     </div>
 
     <hr>
 
-    <h3>Usuarios del Sistema</h3>
-    <table class="table">
-      <thead>
-        <tr>
-          <th>ID</th>
-          <th>Usuario</th>
-          <th>Tipo</th>
-          <th>Estado</th>
-          <th>Último Acceso</th>
-          <th>Acciones</th>
-        </tr>
-      </thead>
-      <tbody id="usuariosTable">
-        <tr>
-          <td colspan="6">Cargando usuarios...</td>
-        </tr>
-      </tbody>
-    </table>
+    <div class="table-section">
+      <h3> Usuarios del Sistema</h3>
+      <div style="overflow-x:auto;">
+        <table class="table">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Usuario</th>
+              <th>Tipo</th>
+              <th>Estado</th>
+              <th>Fecha Creación</th>
+              <th>Último Acceso</th>
+              <th>Acciones</th>
+            </tr>
+          </thead>
+          <tbody id="usuariosTable">
+            <tr>
+              <td colspan="7" style="text-align:center;">Cargando usuarios...</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
   </div>
 
-    <script>
-        // Gestionar Usuarios - Admin
-        document.addEventListener('DOMContentLoaded', function() {
-          cargarUsuarios();
-          document.getElementById('userForm').addEventListener('submit', guardarUsuario);
-        });
+  <div id="editModal" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.5);z-index:1000;justify-content:center;align-items:center;">
+    <div style="background:white;padding:0;border-radius:10px;max-width:500px;width:90%;max-height:90vh;overflow-y:auto;">
+      <div style="display:flex;justify-content:space-between;align-items:center;padding:1.5rem;border-bottom:1px solid #eee;">
+        <h3 style="margin:0;color:#1e3c72;"> Editar Usuario</h3>
+        <span onclick="cerrarModal()" style="font-size:2rem;cursor:pointer;color:#666;line-height:1;">&times;</span>
+      </div>
+      <form id="editForm" style="padding:1.5rem;">
+        <input type="hidden" id="edit_id_usuario">
+        
+        <div class="form-group">
+          <label for="edit_nombre_usuario">Nombre de Usuario:</label>
+          <input type="text" id="edit_nombre_usuario" required minlength="4">
+        </div>
 
-        function cargarUsuarios() {
-          fetch('/admin/api/usuarios')
-            .then(res => res.json())
-            .then(data => {
-              const tbody = document.getElementById('usuariosTable');
-              tbody.innerHTML = '';
-              
-              if (data.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="6" style="text-align: center;">No hay usuarios registrados</td></tr>';
-                return;
-              }
+        <div class="form-group">
+          <label for="edit_tipo_usuario">Tipo de Usuario:</label>
+          <select id="edit_tipo_usuario" required>
+            <option value="ALUMNO">Alumno</option>
+            <option value="ADMIN">Administrador</option>
+          </select>
+        </div>
 
-              data.forEach(usuario => {
-                const fechaCreacion = usuario.FECHA_CREACION ? new Date(usuario.FECHA_CREACION).toLocaleDateString() : '-';
-                const ultimoAcceso = usuario.ULTIMO_ACCESO ? new Date(usuario.ULTIMO_ACCESO).toLocaleDateString() : 'Nunca';
+        <div class="form-group">
+          <label>
+            <input type="checkbox" id="cambiar_contrasena">
+            Cambiar contraseña
+          </label>
+        </div>
 
-                const row = `
-                  <tr>
-                    <td>${usuario.ID_USUARIO}</td>
-                    <td>${usuario.NOMBRE_USUARIO}</td>
-                    <td>${usuario.TIPO_USUARIO}</td>
-                    <td><span class="badge badge-success">${usuario.ESTADO}</span></td>
-                    <td>${ultimoAcceso}</td>
-                    <td>
-                      <button class="btn btn-small btn-warning" onclick="abrirEditarUsuario(${usuario.ID_USUARIO}, '${usuario.NOMBRE_USUARIO}', '${usuario.TIPO_USUARIO}')">✏️ Editar</button>
-                      <button class="btn btn-small btn-danger" onclick="eliminarUsuario(${usuario.ID_USUARIO})">🗑️ Eliminar</button>
-                    </td>
-                  </tr>
-                `;
-                tbody.innerHTML += row;
-              });
-            })
-            .catch(err => {
-              console.error('Error:', err);
-              document.getElementById('usuariosTable').innerHTML = '<tr><td colspan="6" style="text-align: center; color: red;">Error al cargar usuarios</td></tr>';
-            });
-        }
+        <div id="password-fields" style="display:none;">
+          <div class="form-group">
+            <label for="edit_nueva_contrasena">Nueva Contraseña:</label>
+            <input type="password" id="edit_nueva_contrasena" minlength="6" placeholder="Mínimo 6 caracteres">
+          </div>
+        </div>
 
-        function guardarUsuario(event) {
-          event.preventDefault();
+        <div style="border-top:1px solid #eee;padding-top:1rem;display:flex;gap:1rem;justify-content:flex-end;">
+          <button type="button" class="btn btn-secondary" onclick="cerrarModal()">Cancelar</button>
+          <button type="submit" class="btn btn-primary">Guardar Cambios</button>
+        </div>
+      </form>
+    </div>
+  </div>
 
-          const nombre_usuario = document.getElementById('nombre_usuario').value;
-          const contrasena = document.getElementById('contrasena').value;
-          const tipo_usuario = document.getElementById('tipo_usuario').value;
-
-          if (!nombre_usuario || !contrasena || !tipo_usuario) {
-            alert('⚠️ Debes completar todos los campos');
-            return;
-          }
-
-          fetch('/admin/api/usuarios/crear', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-              nombre_usuario,
-              contrasena,
-              tipo_usuario
-            })
-          })
-            .then(res => res.json())
-            .then(data => {
-              if (data.success) {
-                alert('✅ Usuario creado exitosamente');
-                document.getElementById('userForm').reset();
-                cargarUsuarios();
-              } else {
-                alert('❌ Error: ' + (data.error || 'Error desconocido'));
-              }
-            })
-            .catch(err => {
-              console.error('Error:', err);
-              alert('❌ Error al crear usuario');
-            });
-        }
-
-        function abrirEditarUsuario(id, nombre, tipo) {
-          const nuevoNombre = prompt('Nuevo nombre de usuario:', nombre);
-          if (nuevoNombre === null) return;
-
-          const nuevoTipo = prompt('Nuevo tipo de usuario (ALUMNO/ADMIN/DOCENTE):', tipo);
-          if (nuevoTipo === null) return;
-
-          fetch(`/admin/api/usuarios/${id}`, {
-            method: 'PUT',
-            headers: {
-              'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-              nombre_usuario: nuevoNombre,
-              tipo_usuario: nuevoTipo
-            })
-          })
-            .then(res => res.json())
-            .then(data => {
-              if (data.success) {
-                alert('✅ Usuario editado exitosamente');
-                cargarUsuarios();
-              } else {
-                alert('❌ Error: ' + (data.error || 'Error desconocido'));
-              }
-            })
-            .catch(err => {
-              console.error('Error:', err);
-              alert('❌ Error al editar usuario');
-            });
-        }
-
-        function eliminarUsuario(id) {
-          if (confirm('¿Estás seguro de que deseas eliminar este usuario?')) {
-            fetch(`/admin/api/usuarios/${id}`, {
-              method: 'DELETE',
-              headers: {
-                'Content-Type': 'application/json'
-              }
-            })
-              .then(res => res.json())
-              .then(data => {
-                if (data.success) {
-                  alert('✅ Usuario eliminado exitosamente');
-                  cargarUsuarios();
-                } else {
-                  alert('❌ Error: ' + (data.error || 'Error desconocido'));
-                }
-              })
-              .catch(err => {
-                console.error('Error:', err);
-                alert('❌ Error al eliminar usuario');
-              });
-          }
-        }
-
-        // Estilos
-        const style = document.createElement('style');
-        style.textContent = `
-          .badge {
-            padding: 4px 8px;
-            border-radius: 12px;
-            font-size: 12px;
-            font-weight: bold;
-          }
-          .badge-success {
-            background: #d4edda;
-            color: #155724;
-          }
-          .btn-small {
-            padding: 4px 8px;
-            font-size: 12px;
-            margin-right: 5px;
-          }
-          .btn-warning {
-            background: #ffc107;
-            color: #000;
-          }
-          .btn-danger {
-            background: #dc3545;
-            color: #fff;
-          }
-        `;
-        document.head.appendChild(style);
-    </script>
+  <script src="/js/admin/usuarios.js?v=3"></script>
+  <style>
+    .notification.success{background:#d4edda;border-left:4px solid #28a745;color:#155724;}
+    .notification.error{background:#f8d7da;border-left:4px solid #dc3545;color:#721c24;}
+    .badge{padding:4px 10px;border-radius:12px;font-size:0.85rem;font-weight:500;}
+    .badge-success{background:#d4edda;color:#155724;}
+    .badge-inactive{background:#f8d7da;color:#721c24;}
+    .btn-small{padding:0.4rem 0.8rem;font-size:0.85rem;margin-right:0.3rem;}
+    .btn-warning{background:#ffc107;color:#000;}
+    .btn-warning:hover{background:#e0a800;}
+  </style>
 </body>
 </html>
