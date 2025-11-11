@@ -12,26 +12,96 @@
       <h1>🎓 TechnoAcademy University</h1>
       <h2>Sistema de Registro Académico</h2>
       
-      <form method="POST" action="/login" class="login-form">
+      <!-- Mensaje de error -->
+      <div id="error-message" class="error-message" style="display: none;"></div>
+      
+      <form id="loginForm" method="POST" action="/login" class="login-form">
         <div class="form-group">
           <label for="nombre_usuario">Usuario:</label>
-          <input type="text" id="nombre_usuario" name="nombre_usuario" required placeholder="Ingrese su usuario">
+          <input type="text" id="nombre_usuario" name="nombre_usuario" required 
+                 placeholder="Ingrese su usuario" autocomplete="username">
         </div>
 
         <div class="form-group">
           <label for="contrasena">Contraseña:</label>
-          <input type="password" id="contrasena" name="contrasena" required placeholder="Ingrese su contraseña">
+          <input type="password" id="contrasena" name="contrasena" required 
+                 placeholder="Ingrese su contraseña" autocomplete="current-password">
         </div>
 
-        <button type="submit" class="btn btn-primary">Iniciar Sesión</button>
+        <button type="submit" class="btn btn-primary">
+          <span id="btn-text">Iniciar Sesión</span>
+          <span id="btn-loader" style="display: none;">Iniciando...</span>
+        </button>
       </form>
 
-      <div class="info-box">
-        <p><strong>Usuarios de prueba:</strong></p>
-        <p>👨‍💼 Admin: admin / admin123</p>
-        <p>👨‍🎓 Alumno: alumno1 / alumno123</p>
+      <div class="login-footer">
+        <p style="color: #5a6c7d; font-size: 0.9rem; margin-top: 1.5rem;">
+          © 2025 TechnoAcademy University
+        </p>
       </div>
     </div>
   </div>
+
+  <script>
+    const form = document.getElementById('loginForm');
+    const errorMessage = document.getElementById('error-message');
+    const btnText = document.getElementById('btn-text');
+    const btnLoader = document.getElementById('btn-loader');
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      
+      // Ocultar error previo
+      errorMessage.style.display = 'none';
+      
+      // Mostrar loader
+      btnText.style.display = 'none';
+      btnLoader.style.display = 'inline';
+      form.querySelector('button').disabled = true;
+
+      const formData = new FormData(form);
+      const data = {
+        nombre_usuario: formData.get('nombre_usuario'),
+        contrasena: formData.get('contrasena')
+      };
+
+      try {
+        const response = await fetch('/login', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(data)
+        });
+
+        const result = await response.json();
+
+        if (response.ok) {
+          // Login exitoso - redirigir
+          window.location.href = result.redirect;
+        } else {
+          // Mostrar error
+          showError(result.error || 'Error al iniciar sesión');
+        }
+      } catch (error) {
+        showError('Error de conexión. Intente nuevamente.');
+      } finally {
+        // Restaurar botón
+        btnText.style.display = 'inline';
+        btnLoader.style.display = 'none';
+        form.querySelector('button').disabled = false;
+      }
+    });
+
+    function showError(message) {
+      errorMessage.textContent = message;
+      errorMessage.style.display = 'block';
+      
+      // Auto-ocultar después de 5 segundos
+      setTimeout(() => {
+        errorMessage.style.display = 'none';
+      }, 5000);
+    }
+  </script>
 </body>
 </html>

@@ -45,17 +45,30 @@ async function login(req, res) {
 
     console.log(`✅ Login exitoso: ${usuario.NOMBRE_USUARIO} (${usuario.TIPO_USUARIO})`);
 
-    // Redirigir según tipo de usuario
+    // Determinar redirección según tipo de usuario
+    let redirectUrl = '/usuario/dashboard';
     if (usuario.TIPO_USUARIO === 'ADMIN') {
-      res.redirect('/admin/dashboard');
+      redirectUrl = '/admin/dashboard';
     } else if (usuario.TIPO_USUARIO === 'ALUMNO') {
-      res.redirect('/alumno/dashboard');
+      redirectUrl = '/alumno/dashboard';
+    }
+
+    // Responder con JSON si es AJAX, sino redirigir
+    if (req.headers['content-type'] === 'application/json') {
+      res.json({ 
+        success: true, 
+        redirect: redirectUrl,
+        usuario: {
+          nombre: usuario.NOMBRE_USUARIO,
+          tipo: usuario.TIPO_USUARIO
+        }
+      });
     } else {
-      res.redirect('/usuario/dashboard');
+      res.redirect(redirectUrl);
     }
   } catch (err) {
     console.error('❌ Error en login:', err);
-    res.status(500).json({ error: 'Error en el servidor' });
+    res.status(500).json({ error: 'Error en el servidor. Intente nuevamente.' });
   }
 }
 
