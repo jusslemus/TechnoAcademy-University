@@ -207,6 +207,78 @@ router.get('/api/pagos', async (req, res) => {
   }
 });
 
+// ---- REALIZAR PAGO ----
+router.post('/api/pagar', async (req, res) => {
+  try {
+    const id_usuario = req.session.usuario.id;
+    const { id_pago, metodo_pago } = req.body;
+
+    if (!id_pago || !metodo_pago) {
+      return res.status(400).json({ 
+        success: false, 
+        error: 'ID de pago y método de pago son requeridos' 
+      });
+    }
+
+    // Obtener id_alumno
+    const alumno = await db.fetchOne(
+      `SELECT id_alumno FROM alumnos WHERE id_usuario = :id_usuario`,
+      { id_usuario }
+    );
+
+    if (!alumno) {
+      return res.status(404).json({ 
+        success: false, 
+        error: 'Alumno no encontrado' 
+      });
+    }
+
+    // Verificar que el pago pertenece al alumno y está pendiente
+    const pago = await db.fetchOne(
+      `SELECT * FROM pagos WHERE id_pago = :id_pago AND id_alumno = :id_alumno`,
+      { id_pago, id_alumno: alumno.ID_ALUMNO }
+    );
+
+    if (!pago) {
+      return res.status(404).json({ 
+        success: false, 
+        error: 'Pago no encontrado o no pertenece al alumno' 
+      });
+    }
+
+    if (pago.ESTADO === 'PAGADO') {
+      return res.status(400).json({ 
+        success: false, 
+        error: 'Este pago ya ha sido procesado' 
+      });
+    }
+
+    // Actualizar el pago
+    await db.executeQuery(
+      `UPDATE pagos 
+       SET estado = 'PAGADO', 
+           metodo_pago = :metodo_pago,
+           fecha_pago = SYSDATE
+       WHERE id_pago = :id_pago`,
+      { 
+        metodo_pago, 
+        id_pago 
+      }
+    );
+
+    res.json({ 
+      success: true, 
+      message: 'Pago procesado exitosamente' 
+    });
+  } catch (err) {
+    console.error('Error procesando pago:', err);
+    res.status(500).json({ 
+      success: false, 
+      error: 'Error al procesar el pago' 
+    });
+  }
+});
+
 // ---- PERÍODOS ACADÉMICOS ----
 router.get('/api/periodos', async (req, res) => {
   try {
