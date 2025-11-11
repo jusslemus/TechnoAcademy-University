@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mis Materias - TechnoAcademy University</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="logo">🎓 TechnoAcademy University</div>
+            <div class="nav-links">
+                <a href="/alumno/dashboard">Dashboard</a>
+                <a href="/logout">Cerrar Sesión</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container">
+        <h1>Disponibilidad de Materias</h1>
+        
+        <div class="filter-section">
+            <label for="selectPeriodo">Período Académico:</label>
+            <select id="selectPeriodo" onchange="cargarMaterias()">
+                <option value="">Seleccionar período...</option>
+            </select>
+        </div>
+
+        <div class="materias-grid">
+            <div class="materia-card" id="materiasContainer">
+                <p style="text-align: center;">Cargando materias disponibles...</p>
+            </div>
+        </div>
+    </div>
+
+    <style>
+        .filter-section {
+            background: white;
+            padding: 15px;
+            margin-bottom: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .filter-section select {
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+            margin-left: 10px;
+        }
+
+        .materias-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+        }
+
+        .materia-card {
+            background: white;
+            border-left: 4px solid #667eea;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .materia-card h3 {
+            margin-top: 0;
+            color: #667eea;
+        }
+
+        .materia-info {
+            font-size: 14px;
+            color: #666;
+            margin: 10px 0;
+        }
+
+        .materia-info strong {
+            color: #333;
+        }
+
+        .materia-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .materia-actions button {
+            flex: 1;
+        }
+
+        .cupo-info {
+            background: #f0f0f0;
+            padding: 10px;
+            border-radius: 4px;
+            margin: 10px 0;
+            font-size: 13px;
+        }
+    </style>
+
+    <script>
+        function cargarMaterias() {
+            console.log('Cargar materias - Implementar API');
+        }
+
+        function inscribirse(id_grupo) {
+            if (confirm('¿Deseas inscribirse en este grupo?')) {
+                console.log('Inscribirse en grupo:', id_grupo);
+            }
+        }
+
+        // Cargar períodos al iniciar
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('Cargar períodos académicos');
+        });
+    </script>
+</body>
+</html>

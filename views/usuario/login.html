@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login - TechnoAcademy University</title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body class="login-page">
+  <div class="login-container">
+    <div class="login-box">
+      <h1>🎓 TechnoAcademy University</h1>
+      <h2>Sistema de Registro Académico</h2>
+      
+      <form method="POST" action="/login" class="login-form">
+        <div class="form-group">
+          <label for="nombre_usuario">Usuario:</label>
+          <input type="text" id="nombre_usuario" name="nombre_usuario" required placeholder="Ingrese su usuario">
+        </div>
+
+        <div class="form-group">
+          <label for="contrasena">Contraseña:</label>
+          <input type="password" id="contrasena" name="contrasena" required placeholder="Ingrese su contraseña">
+        </div>
+
+        <button type="submit" class="btn btn-primary">Iniciar Sesión</button>
+      </form>
+
+      <div class="info-box">
+        <p><strong>Usuarios de prueba:</strong></p>
+        <p>👨‍💼 Admin: admin / admin123</p>
+        <p>👨‍🎓 Alumno: alumno1 / alumno123</p>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

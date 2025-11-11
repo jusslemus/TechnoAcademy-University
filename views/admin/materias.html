@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestionar Materias - TechnoAcademy University</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="logo">🎓 TechnoAcademy University</div>
+            <div class="nav-links">
+                <a href="/admin/dashboard">Dashboard</a>
+                <a href="/logout">Cerrar Sesión</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container">
+        <h1>Gestionar Materias</h1>
+        
+        <div class="action-buttons">
+            <button class="btn btn-primary" onclick="abrirFormularioNuevaMateria()">+ Nueva Materia</button>
+        </div>
+
+        <div id="formularioContainer" class="form-container" style="display: none;">
+            <h2>Nueva Materia</h2>
+            <form id="formMateria" onsubmit="guardarMateria(event)">
+                <div class="form-group">
+                    <label for="carrera">Carrera:</label>
+                    <select id="carrera" name="carrera" required>
+                        <option value="">Seleccionar carrera...</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="nombre_materia">Nombre de Materia:</label>
+                    <input type="text" id="nombre_materia" name="nombre_materia" required>
+                </div>
+                <div class="form-group">
+                    <label for="codigo_materia">Código:</label>
+                    <input type="text" id="codigo_materia" name="codigo_materia" required>
+                </div>
+                <div class="form-group">
+                    <label for="creditos">Créditos:</label>
+                    <input type="number" id="creditos" name="creditos" min="1" max="10" required>
+                </div>
+                <div class="form-group">
+                    <label for="horas_teoricas">Horas Teóricas:</label>
+                    <input type="number" id="horas_teoricas" name="horas_teoricas" min="0" required>
+                </div>
+                <div class="form-group">
+                    <label for="horas_practicas">Horas Prácticas:</label>
+                    <input type="number" id="horas_practicas" name="horas_practicas" min="0" required>
+                </div>
+                <div class="form-buttons">
+                    <button type="submit" class="btn btn-success">Guardar</button>
+                    <button type="button" class="btn btn-secondary" onclick="cerrarFormulario()">Cancelar</button>
+                </div>
+            </form>
+        </div>
+
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Código</th>
+                    <th>Nombre</th>
+                    <th>Créditos</th>
+                    <th>Horas Teóricas</th>
+                    <th>Horas Prácticas</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody id="materiasTable">
+                <tr>
+                    <td colspan="6" style="text-align: center;">Cargando...</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <script src="/js/admin/materias.js"></script>
+</body>
+</html>

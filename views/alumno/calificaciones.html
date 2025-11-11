@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mis Calificaciones - TechnoAcademy University</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="logo">🎓 TechnoAcademy University</div>
+            <div class="nav-links">
+                <a href="/alumno/dashboard">Dashboard</a>
+                <a href="/logout">Cerrar Sesión</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container">
+        <h1>Mis Calificaciones</h1>
+        
+        <div class="resumen-academico">
+            <div class="card">
+                <h3>Promedio General</h3>
+                <div class="valor" id="promedioGeneral">-</div>
+            </div>
+            <div class="card">
+                <h3>Materias Aprobadas</h3>
+                <div class="valor" id="materiasAprobadas">-</div>
+            </div>
+            <div class="card">
+                <h3>Materias Reprobadas</h3>
+                <div class="valor" id="materiasReprobadas">-</div>
+            </div>
+        </div>
+
+        <h2>Calificaciones por Período</h2>
+        
+        <div class="filter-section">
+            <label for="selectPeriodo">Período:</label>
+            <select id="selectPeriodo" onchange="filtrarCalificaciones()">
+                <option value="">Todos los períodos</option>
+            </select>
+        </div>
+
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Código</th>
+                    <th>Materia</th>
+                    <th>Créditos</th>
+                    <th>Docente</th>
+                    <th>Nota</th>
+                    <th>Estado</th>
+                </tr>
+            </thead>
+            <tbody id="calificacionesTable">
+                <tr>
+                    <td colspan="6" style="text-align: center;">Cargando calificaciones...</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <style>
+        .resumen-academico {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .resumen-academico .card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 8px;
+            text-align: center;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        .resumen-academico .card h3 {
+            margin: 0 0 10px 0;
+            font-size: 14px;
+            opacity: 0.9;
+        }
+
+        .resumen-academico .valor {
+            font-size: 36px;
+            font-weight: bold;
+        }
+
+        .filter-section {
+            background: white;
+            padding: 15px;
+            margin-bottom: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .filter-section select {
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+            margin-left: 10px;
+        }
+
+        .table tbody tr {
+            transition: background-color 0.2s;
+        }
+
+        .table tbody tr:hover {
+            background-color: #f5f5f5;
+        }
+    </style>
+
+    <script src="/js/alumno/calificaciones.js"></script>
+</body>
+</html>

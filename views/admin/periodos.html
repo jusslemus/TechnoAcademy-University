@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestionar Períodos - TechnoAcademy University</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="logo">🎓 TechnoAcademy University</div>
+            <div class="nav-links">
+                <a href="/admin/dashboard">Dashboard</a>
+                <a href="/logout">Cerrar Sesión</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container">
+        <h1>Gestionar Períodos Académicos</h1>
+        
+        <div class="action-buttons">
+            <button class="btn btn-primary" onclick="abrirFormularioNuevoPeriodo()">+ Nuevo Período</button>
+        </div>
+
+        <div id="formularioContainer" class="form-container" style="display: none;">
+            <h2>Nuevo Período Académico</h2>
+            <form id="formPeriodo" onsubmit="guardarPeriodo(event)">
+                <div class="form-group">
+                    <label for="nombre_periodo">Nombre del Período:</label>
+                    <input type="text" id="nombre_periodo" name="nombre_periodo" placeholder="Ej: 2025-1" required>
+                </div>
+                <div class="form-group">
+                    <label for="fecha_inicio">Fecha de Inicio:</label>
+                    <input type="date" id="fecha_inicio" name="fecha_inicio" required>
+                </div>
+                <div class="form-group">
+                    <label for="fecha_fin">Fecha de Fin:</label>
+                    <input type="date" id="fecha_fin" name="fecha_fin" required>
+                </div>
+                <div class="form-group">
+                    <label for="fecha_inicio_inscripcion">Inicio de Inscripción:</label>
+                    <input type="date" id="fecha_inicio_inscripcion" name="fecha_inicio_inscripcion">
+                </div>
+                <div class="form-group">
+                    <label for="fecha_fin_inscripcion">Fin de Inscripción:</label>
+                    <input type="date" id="fecha_fin_inscripcion" name="fecha_fin_inscripcion">
+                </div>
+                <div class="form-buttons">
+                    <button type="submit" class="btn btn-success">Guardar</button>
+                    <button type="button" class="btn btn-secondary" onclick="cerrarFormulario()">Cancelar</button>
+                </div>
+            </form>
+        </div>
+
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Nombre</th>
+                    <th>Fecha Inicio</th>
+                    <th>Fecha Fin</th>
+                    <th>Inscripción</th>
+                    <th>Estado</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody id="periodosTable">
+                <tr>
+                    <td colspan="6" style="text-align: center;">Cargando...</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <script src="/js/admin/periodos.js"></script>
+</body>
+</html>

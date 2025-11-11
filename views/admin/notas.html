@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestionar Notas - TechnoAcademy University</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="logo">🎓 TechnoAcademy University</div>
+            <div class="nav-links">
+                <a href="/admin/dashboard">Dashboard</a>
+                <a href="/logout">Cerrar Sesión</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container">
+        <h1>Gestionar Notas</h1>
+        
+        <div class="filter-section">
+            <label for="selectGrupo">Seleccionar Grupo:</label>
+            <select id="selectGrupo" onchange="cargarAlumnosDelGrupo()">
+                <option value="">Seleccionar grupo...</option>
+            </select>
+        </div>
+
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Carnet</th>
+                    <th>Alumno</th>
+                    <th>Nota Parcial 1</th>
+                    <th>Nota Parcial 2</th>
+                    <th>Nota Final</th>
+                    <th>Estado</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody id="notasTable">
+                <tr>
+                    <td colspan="7" style="text-align: center;">Selecciona un grupo para ver las notas</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div id="modalEditar" class="modal" style="display: none;">
+        <div class="modal-content">
+            <span class="close" onclick="cerrarModal()">&times;</span>
+            <h2>Editar Nota</h2>
+            <form id="formNota" onsubmit="guardarNota(event)">
+                <div class="form-group">
+                    <label for="alumno_nombre">Alumno:</label>
+                    <input type="text" id="alumno_nombre" disabled>
+                </div>
+                <div class="form-group">
+                    <label for="nota_parcial_1">Nota Parcial 1:</label>
+                    <input type="number" id="nota_parcial_1" min="0" max="5" step="0.1" required>
+                </div>
+                <div class="form-group">
+                    <label for="nota_parcial_2">Nota Parcial 2:</label>
+                    <input type="number" id="nota_parcial_2" min="0" max="5" step="0.1" required>
+                </div>
+                <div class="form-buttons">
+                    <button type="submit" class="btn btn-success">Guardar</button>
+                    <button type="button" class="btn btn-secondary" onclick="cerrarModal()">Cancelar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <style>
+        .modal {
+            position: fixed;
+            z-index: 1;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.4);
+        }
+
+        .modal-content {
+            background-color: #fefefe;
+            margin: 10% auto;
+            padding: 20px;
+            border: 1px solid #888;
+            width: 400px;
+            border-radius: 8px;
+        }
+
+        .close {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .close:hover {
+            color: black;
+        }
+
+        .filter-section {
+            background: white;
+            padding: 15px;
+            margin-bottom: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .filter-section select {
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+    </style>
+
+    <script>
+        function cargarAlumnosDelGrupo() {
+            console.log('Cargar alumnos - Implementar API');
+        }
+
+        function editarNota(id) {
+            document.getElementById('modalEditar').style.display = 'block';
+        }
+
+        function cerrarModal() {
+            document.getElementById('modalEditar').style.display = 'none';
+        }
+
+        function guardarNota(event) {
+            event.preventDefault();
+            console.log('Guardar nota - Implementar API');
+        }
+    </script>
+</body>
+</html>

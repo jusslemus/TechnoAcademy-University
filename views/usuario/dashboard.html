@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard Usuario - TechnoAcademy</title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+  <nav class="navbar">
+    <div class="nav-container">
+      <h1>🎓 TechnoAcademy</h1>
+      <ul class="nav-menu">
+        <li><a href="/usuario/dashboard">Inicio</a></li>
+        <li><a href="/logout">Cerrar Sesión</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <div class="container">
+    <h2>Bienvenido Usuario</h2>
+    <p>Este es tu panel de usuario general.</p>
+    
+    <div class="info-box">
+      <h3>Información de tu cuenta</h3>
+      <p>ID: <span id="userID"></span></p>
+      <p>Usuario: <span id="userName"></span></p>
+      <p>Tipo: <span id="userType"></span></p>
+    </div>
+  </div>
+
+  <script src="/js/dashboard.js"></script>
+</body>
+</html>

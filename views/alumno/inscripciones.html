@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mis Inscripciones - TechnoAcademy</title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+  <nav class="navbar">
+    <div class="nav-container">
+      <h1>🎓 TechnoAcademy - Alumno</h1>
+      <ul class="nav-menu">
+        <li><a href="/alumno/dashboard">Dashboard</a></li>
+        <li><a href="/alumno/inscripciones">Mis Inscripciones</a></li>
+        <li><a href="/alumno/materias">Materias Disponibles</a></li>
+        <li><a href="/logout">Cerrar Sesión</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <div class="container">
+    <h2>📚 Mis Inscripciones</h2>
+
+    <table class="table">
+      <thead>
+        <tr>
+          <th>Código</th>
+          <th>Materia</th>
+          <th>Sección</th>
+          <th>Docente</th>
+          <th>Horario</th>
+          <th>Estado</th>
+          <th>Acciones</th>
+        </tr>
+      </thead>
+      <tbody id="inscripcionesTable">
+        <tr>
+          <td colspan="7">Cargando tus inscripciones...</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h3>Total de Créditos: <span id="totalCreditos">0</span></h3>
+
+    <a href="/alumno/materias" class="btn btn-primary">Inscribir Más Materias</a>
+  </div>
+
+  <script src="/js/alumno/inscripciones.js"></script>
+</body>
+</html>

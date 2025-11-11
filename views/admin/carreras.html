@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestionar Carreras - TechnoAcademy University</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="logo">🎓 TechnoAcademy University</div>
+            <div class="nav-links">
+                <a href="/admin/dashboard">Dashboard</a>
+                <a href="/logout">Cerrar Sesión</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container">
+        <h1>Gestionar Carreras</h1>
+        
+        <div class="action-buttons">
+            <button class="btn btn-primary" onclick="abrirFormularioNuevaCarrera()">+ Nueva Carrera</button>
+        </div>
+
+        <div id="formularioContainer" class="form-container" style="display: none;">
+            <h2>Nueva Carrera</h2>
+            <form id="formCarrera" onsubmit="guardarCarrera(event)">
+                <div class="form-group">
+                    <label for="nombre_carrera">Nombre de Carrera:</label>
+                    <input type="text" id="nombre_carrera" name="nombre_carrera" required>
+                </div>
+                <div class="form-group">
+                    <label for="codigo_carrera">Código:</label>
+                    <input type="text" id="codigo_carrera" name="codigo_carrera" required>
+                </div>
+                <div class="form-group">
+                    <label for="duracion_semestres">Duración (semestres):</label>
+                    <input type="number" id="duracion_semestres" name="duracion_semestres" min="1" required>
+                </div>
+                <div class="form-group">
+                    <label for="descripcion">Descripción:</label>
+                    <textarea id="descripcion" name="descripcion" rows="4"></textarea>
+                </div>
+                <div class="form-buttons">
+                    <button type="submit" class="btn btn-success">Guardar</button>
+                    <button type="button" class="btn btn-secondary" onclick="cerrarFormulario()">Cancelar</button>
+                </div>
+            </form>
+        </div>
+
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Código</th>
+                    <th>Nombre</th>
+                    <th>Duración</th>
+                    <th>Estado</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody id="carrerasTable">
+                <tr>
+                    <td colspan="5" style="text-align: center;">Cargando...</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <script src="/js/admin/carreras.js"></script>
+</body>
+</html>

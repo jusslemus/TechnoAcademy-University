@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mi Horario - TechnoAcademy University</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="logo">🎓 TechnoAcademy University</div>
+            <div class="nav-links">
+                <a href="/alumno/dashboard">Dashboard</a>
+                <a href="/logout">Cerrar Sesión</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container">
+        <h1>Mi Horario</h1>
+        
+        <div class="filter-section">
+            <label for="selectPeriodo">Período Académico:</label>
+            <select id="selectPeriodo" onchange="cargarHorario()">
+                <option value="">Seleccionar período...</option>
+            </select>
+        </div>
+
+        <div class="horario-container">
+            <table class="horario-table">
+                <thead>
+                    <tr>
+                        <th>Hora</th>
+                        <th>Lunes</th>
+                        <th>Martes</th>
+                        <th>Miércoles</th>
+                        <th>Jueves</th>
+                        <th>Viernes</th>
+                    </tr>
+                </thead>
+                <tbody id="horarioTable">
+                    <tr>
+                        <td colspan="6" style="text-align: center; padding: 40px;">Selecciona un período para ver tu horario</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <h2>Resumen de Clases</h2>
+        
+        <div id="resumenClases" class="clases-grid">
+            <!-- Se llenará dinámicamente -->
+        </div>
+    </div>
+
+    <style>
+        .filter-section {
+            background: white;
+            padding: 15px;
+            margin-bottom: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .filter-section select {
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+            margin-left: 10px;
+        }
+
+        .horario-container {
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            overflow-x: auto;
+            margin-bottom: 30px;
+        }
+
+        .horario-table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 600px;
+        }
+
+        .horario-table th,
+        .horario-table td {
+            border: 1px solid #ddd;
+            padding: 12px;
+            text-align: center;
+        }
+
+        .horario-table th {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            font-weight: bold;
+        }
+
+        .horario-table tbody tr:nth-child(odd) {
+            background: #f9f9f9;
+        }
+
+        .horario-table .clase {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 4px;
+            padding: 8px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+
+        .clases-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 15px;
+        }
+
+        .clase-card {
+            background: white;
+            border-left: 4px solid #667eea;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .clase-card h3 {
+            margin: 0 0 10px 0;
+            color: #667eea;
+        }
+
+        .clase-info {
+            font-size: 13px;
+            color: #666;
+            line-height: 1.6;
+        }
+
+        .clase-info strong {
+            color: #333;
+        }
+    </style>
+
+    <script src="/js/alumno/horario.js"></script>
+</body>
+</html>

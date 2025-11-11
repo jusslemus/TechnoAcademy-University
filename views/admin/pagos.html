@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestionar Pagos - TechnoAcademy University</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="logo">🎓 TechnoAcademy University</div>
+            <div class="nav-links">
+                <a href="/admin/dashboard">Dashboard</a>
+                <a href="/logout">Cerrar Sesión</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container">
+        <h1>Gestionar Pagos</h1>
+        
+        <div class="filter-section">
+            <label for="filtroEstado">Filtrar por Estado:</label>
+            <select id="filtroEstado" onchange="filtrarPagos()">
+                <option value="">Todos</option>
+                <option value="PENDIENTE">Pendiente</option>
+                <option value="PAGADO">Pagado</option>
+                <option value="VENCIDO">Vencido</option>
+            </select>
+        </div>
+
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>ID Pago</th>
+                    <th>Alumno</th>
+                    <th>Concepto</th>
+                    <th>Monto</th>
+                    <th>Fecha Vencimiento</th>
+                    <th>Estado</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody id="pagosTable">
+                <tr>
+                    <td colspan="7" style="text-align: center;">Cargando...</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div id="modalRegistro" class="modal" style="display: none;">
+        <div class="modal-content">
+            <span class="close" onclick="cerrarModal()">&times;</span>
+            <h2>Registrar Pago</h2>
+            <form id="formPago" onsubmit="guardarPago(event)">
+                <div class="form-group">
+                    <label for="alumno">Alumno:</label>
+                    <input type="text" id="alumno" disabled>
+                </div>
+                <div class="form-group">
+                    <label for="monto">Monto Pagado:</label>
+                    <input type="number" id="monto" step="0.01" min="0" required>
+                </div>
+                <div class="form-group">
+                    <label for="metodo_pago">Método de Pago:</label>
+                    <select id="metodo_pago" required>
+                        <option value="">Seleccionar...</option>
+                        <option value="EFECTIVO">Efectivo</option>
+                        <option value="TRANSFERENCIA">Transferencia</option>
+                        <option value="CHEQUE">Cheque</option>
+                        <option value="TARJETA">Tarjeta</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="numero_referencia">Número de Referencia:</label>
+                    <input type="text" id="numero_referencia" required>
+                </div>
+                <div class="form-buttons">
+                    <button type="submit" class="btn btn-success">Guardar Pago</button>
+                    <button type="button" class="btn btn-secondary" onclick="cerrarModal()">Cancelar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <style>
+        .modal {
+            position: fixed;
+            z-index: 1;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.4);
+        }
+
+        .modal-content {
+            background-color: #fefefe;
+            margin: 10% auto;
+            padding: 20px;
+            border: 1px solid #888;
+            width: 400px;
+            border-radius: 8px;
+        }
+
+        .close {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .close:hover {
+            color: black;
+        }
+
+        .filter-section {
+            background: white;
+            padding: 15px;
+            margin-bottom: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .filter-section select {
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+    </style>
+
+    <script>
+        function filtrarPagos() {
+            console.log('Filtrar pagos - Implementar API');
+        }
+
+        function registrarPago(id) {
+            document.getElementById('modalRegistro').style.display = 'block';
+        }
+
+        function cerrarModal() {
+            document.getElementById('modalRegistro').style.display = 'none';
+        }
+
+        function guardarPago(event) {
+            event.preventDefault();
+            console.log('Guardar pago - Implementar API');
+        }
+    </script>
+</body>
+</html>

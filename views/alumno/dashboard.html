@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard Alumno - TechnoAcademy</title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+  <nav class="navbar">
+    <div class="nav-container">
+      <h1>🎓 TechnoAcademy - Alumno</h1>
+      <ul class="nav-menu">
+        <li><a href="/alumno/dashboard">Dashboard</a></li>
+        <li><a href="/alumno/inscripciones">Mis Inscripciones</a></li>
+        <li><a href="/alumno/materias">Materias Disponibles</a></li>
+        <li><a href="/alumno/calificaciones">Mis Calificaciones</a></li>
+        <li><a href="/alumno/pagos">Mis Pagos</a></li>
+        <li><a href="/logout">Cerrar Sesión</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <div class="container">
+    <div class="student-header">
+      <h2>👨‍🎓 Bienvenido Alumno</h2>
+      <p>Panel de control de tu información académica</p>
+    </div>
+
+    <div class="student-info">
+      <div class="card">
+        <h3>ℹ️ Mi Información</h3>
+        <p>Carné: <span id="carnet"></span></p>
+        <p>Carrera: <span id="carrera"></span></p>
+        <p>Estado: <span id="estado"></span></p>
+      </div>
+
+      <div class="card">
+        <h3>📚 Mi Inscripción</h3>
+        <p>Materias Inscritas: <span id="materiasInscritas">0</span></p>
+        <p>Créditos Matriculados: <span id="creditosMatriculados">0</span></p>
+        <a href="/alumno/inscripciones" class="btn btn-primary">Ver Detalles</a>
+      </div>
+
+      <div class="card">
+        <h3>📊 Mi Desempeño</h3>
+        <p>Promedio Acumulado: <span id="promedio">-</span></p>
+        <p>Estado Académico: <span id="estadoAcademico">Activo</span></p>
+        <a href="/alumno/calificaciones" class="btn btn-primary">Ver Calificaciones</a>
+      </div>
+
+      <div class="card">
+        <h3>💰 Estado Financiero</h3>
+        <p>Saldo: <span id="saldo">$0.00</span></p>
+        <p>Estado: <span id="estadoFinanciero">Al día</span></p>
+        <a href="/alumno/pagos" class="btn btn-primary">Ver Pagos</a>
+      </div>
+    </div>
+
+    <hr>
+
+    <h3>🎯 Acciones Rápidas</h3>
+    <div class="quick-actions">
+      <a href="/alumno/materias" class="btn btn-primary">Inscribir Materias</a>
+      <a href="/alumno/horario" class="btn btn-primary">Ver Mi Horario</a>
+      <a href="/alumno/calificaciones" class="btn btn-primary">Descargar Reporte</a>
+    </div>
+  </div>
+
+  <script src="/js/alumno/dashboard.js"></script>
+</body>
+</html>

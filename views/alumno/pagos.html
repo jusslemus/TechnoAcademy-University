@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Estado de Pagos - TechnoAcademy University</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="logo">🎓 TechnoAcademy University</div>
+            <div class="nav-links">
+                <a href="/alumno/dashboard">Dashboard</a>
+                <a href="/logout">Cerrar Sesión</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container">
+        <h1>Estado de Pagos</h1>
+        
+        <div class="resumen-pagos">
+            <div class="card">
+                <h3>Total Adeudado</h3>
+                <div class="valor" id="totalAdeudado">$0.00</div>
+            </div>
+            <div class="card">
+                <h3>Total Pagado</h3>
+                <div class="valor" id="totalPagado">$0.00</div>
+            </div>
+            <div class="card">
+                <h3>Cuota Mensual</h3>
+                <div class="valor" id="cuotaMensual">$0.00</div>
+            </div>
+        </div>
+
+        <h2>Historial de Pagos</h2>
+
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Concepto</th>
+                    <th>Monto</th>
+                    <th>Fecha de Vencimiento</th>
+                    <th>Fecha de Pago</th>
+                    <th>Estado</th>
+                    <th>Recibo</th>
+                </tr>
+            </thead>
+            <tbody id="pagosTable">
+                <tr>
+                    <td colspan="6" style="text-align: center;">Cargando historial de pagos...</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <div class="instrucciones">
+            <h3>Instrucciones de Pago</h3>
+            <p>Para realizar pagos, deposita en la siguiente cuenta:</p>
+            <ul>
+                <li><strong>Banco:</strong> Banco Fondo-Fondo</li>
+                <li><strong>Cuenta:</strong> 123456789</li>
+                <li><strong>Titular:</strong> TechnoAcademy University</li>
+                <li><strong>Concepto:</strong> Aranceles + Tu Carnet</li>
+            </ul>
+            <p>Envía comprobante de pago y número de referencia a: pagos@technoacademy.edu</p>
+        </div>
+    </div>
+
+    <style>
+        .resumen-pagos {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .resumen-pagos .card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 8px;
+            text-align: center;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        .resumen-pagos .card h3 {
+            margin: 0 0 10px 0;
+            font-size: 14px;
+            opacity: 0.9;
+        }
+
+        .resumen-pagos .valor {
+            font-size: 28px;
+            font-weight: bold;
+        }
+
+        .instrucciones {
+            background: white;
+            border-left: 4px solid #667eea;
+            padding: 20px;
+            border-radius: 8px;
+            margin-top: 30px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .instrucciones h3 {
+            color: #667eea;
+            margin-top: 0;
+        }
+
+        .instrucciones ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        .instrucciones li {
+            padding: 8px 0;
+            border-bottom: 1px solid #eee;
+            font-size: 14px;
+        }
+
+        .instrucciones li:last-child {
+            border-bottom: none;
+        }
+
+        .estado-pendiente {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .estado-pagado {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .estado-vencido {
+            background: #f8d7da;
+            color: #721c24;
+        }
+    </style>
+
+    <script src="/js/alumno/pagos.js"></script>
+</body>
+</html>
