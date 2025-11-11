@@ -17,6 +17,84 @@ async function getAlumnoInfo(id_usuario) {
   }
 }
 
+// Obtener información completa del alumno con estadísticas
+async function getAlumnoInfoCompleta(id_usuario) {
+  try {
+    const alumno = await db.fetchOne(
+      `SELECT 
+         a.id_alumno,
+         a.carnet,
+         a.nombres,
+         a.apellidos,
+         a.email,
+         a.telefono,
+         c.nombre_carrera,
+         a.id_carrera,
+         (SELECT COUNT(*) FROM inscripciones i 
+          JOIN grupos g ON i.id_grupo = g.id_grupo
+          WHERE i.id_alumno = a.id_alumno AND i.estado = 'INSCRITO') as MATERIAS_INSCRITAS,
+         (SELECT SUM(m.creditos) FROM inscripciones i
+          JOIN grupos g ON i.id_grupo = g.id_grupo
+          JOIN materias m ON g.id_materia = m.id_materia
+          WHERE i.id_alumno = a.id_alumno AND i.estado = 'INSCRITO') as CREDITOS_MATRICULADOS,
+         (SELECT AVG(i.nota_final) FROM inscripciones i
+          WHERE i.id_alumno = a.id_alumno AND i.nota_final IS NOT NULL) as PROMEDIO_ACUMULADO,
+         (SELECT COALESCE(SUM(p.monto), 0) FROM pagos p
+          WHERE p.id_alumno = a.id_alumno AND p.estado = 'PENDIENTE') as SALDO
+       FROM alumnos a
+       LEFT JOIN carreras c ON a.id_carrera = c.id_carrera
+       WHERE a.id_usuario = :id_usuario`,
+      { id_usuario }
+    );
+    
+    if (alumno) {
+      alumno.ESTADO_ACADEMICO = 'Activo';
+      alumno.ESTADO_FINANCIERO = (alumno.SALDO && alumno.SALDO > 0) ? 'Con saldo pendiente' : 'Al día';
+    }
+    
+    return alumno;
+  } catch (err) {
+    console.error('Error obteniendo info completa alumno:', err);
+    throw err;
+  }
+}
+
+// Obtener materias inscritas del alumno (para dashboard)
+async function getMisMateriasInscritas(id_alumno) {
+  try {
+    const materias = await db.fetchQuery(
+      `SELECT 
+         m.id_materia,
+         m.codigo_materia,
+         m.nombre_materia,
+         m.creditos,
+         g.id_grupo,
+         g.numero_grupo,
+         g.horario,
+         g.aula,
+         d.nombres || ' ' || d.apellidos as NOMBRE_DOCENTE,
+         i.estado as ESTADO_INSCRIPCION,
+         i.nota_final,
+         i.nota_p1,
+         i.nota_p2,
+         i.nota_p3,
+         i.nota_p4
+       FROM inscripciones i
+       JOIN grupos g ON i.id_grupo = g.id_grupo
+       JOIN materias m ON g.id_materia = m.id_materia
+       LEFT JOIN docentes d ON g.id_docente = d.id_docente
+       WHERE i.id_alumno = :id_alumno 
+         AND i.estado = 'INSCRITO'
+       ORDER BY m.nombre_materia`,
+      { id_alumno }
+    );
+    return materias;
+  } catch (err) {
+    console.error('Error obteniendo materias inscritas:', err);
+    throw err;
+  }
+}
+
 // Obtener inscripciones del alumno
 async function getInscripciones(id_alumno, id_periodo = null) {
   try {
@@ -216,6 +294,8 @@ async function retirarseMateria(id_inscripcion) {
 
 module.exports = {
   getAlumnoInfo,
+  getAlumnoInfoCompleta,
+  getMisMateriasInscritas,
   getInscripciones,
   getCalificaciones,
   getMateriasDisponibles,

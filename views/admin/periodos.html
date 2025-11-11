@@ -1,78 +1,172 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gestionar Períodos - TechnoAcademy University</title>
+    <title>Gestionar Períodos - Admin</title>
     <link rel="stylesheet" href="/css/style.css">
 </head>
 <body>
     <nav class="navbar">
         <div class="nav-container">
-            <div class="logo">🎓 TechnoAcademy University</div>
-            <div class="nav-links">
-                <a href="/admin/dashboard">Dashboard</a>
-                <a href="/logout">Cerrar Sesión</a>
+            <div class="nav-brand">
+                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M22 10v6M2 10l10-5 10 5-10 5z"></path>
+                    <path d="M6 12v5c3 3 9 3 12 0v-5"></path>
+                </svg>
+                <h1>TechnoAcademy</h1>
             </div>
+            <ul class="nav-menu">
+                <li><a href="/admin/dashboard">Dashboard</a></li>
+                <li><a href="/admin/alumnos">Alumnos</a></li>
+                <li><a href="/admin/docentes">Docentes</a></li>
+                <li><a href="/admin/carreras">Carreras</a></li>
+                <li><a href="/admin/materias">Materias</a></li>
+                <li><a href="/admin/periodos" class="active">Períodos</a></li>
+                <li><a href="/logout" class="btn-logout">Cerrar Sesión</a></li>
+            </ul>
         </div>
     </nav>
 
     <div class="container">
-        <h1>Gestionar Períodos Académicos</h1>
-        
-        <div class="action-buttons">
-            <button class="btn btn-primary" onclick="abrirFormularioNuevoPeriodo()">+ Nuevo Período</button>
+        <div id="notification" style="display:none;padding:1rem;border-radius:5px;margin-bottom:1rem;"></div>
+
+        <h2>Gestionar Períodos Académicos</h2>
+
+        <div style="margin-bottom:2rem;">
+            <input type="text" id="searchInput" placeholder="Buscar por nombre o código..." 
+                   style="width:100%;max-width:400px;padding:0.75rem;border:1px solid #c8d0d8;border-radius:5px;font-size:1rem;">
         </div>
 
-        <div id="formularioContainer" class="form-container" style="display: none;">
-            <h2>Nuevo Período Académico</h2>
-            <form id="formPeriodo" onsubmit="guardarPeriodo(event)">
+        <div class="form-section">
+            <h3>Crear Nuevo Período Académico</h3>
+            <form id="periodoForm">
                 <div class="form-group">
-                    <label for="nombre_periodo">Nombre del Período:</label>
-                    <input type="text" id="nombre_periodo" name="nombre_periodo" placeholder="Ej: 2025-1" required>
+                    <label for="codigo_periodo">Código del Período: *</label>
+                    <input type="text" id="codigo_periodo" required placeholder="Ej: 2025-I" maxlength="20">
+                    <small>Código único para identificar el período</small>
                 </div>
+
                 <div class="form-group">
-                    <label for="fecha_inicio">Fecha de Inicio:</label>
-                    <input type="date" id="fecha_inicio" name="fecha_inicio" required>
+                    <label for="nombre_periodo">Nombre del Período: *</label>
+                    <input type="text" id="nombre_periodo" required placeholder="Ej: Ciclo I - 2025" maxlength="50">
                 </div>
+
                 <div class="form-group">
-                    <label for="fecha_fin">Fecha de Fin:</label>
-                    <input type="date" id="fecha_fin" name="fecha_fin" required>
+                    <label for="fecha_inicio">Fecha de Inicio: *</label>
+                    <input type="date" id="fecha_inicio" required>
                 </div>
+
                 <div class="form-group">
-                    <label for="fecha_inicio_inscripcion">Inicio de Inscripción:</label>
-                    <input type="date" id="fecha_inicio_inscripcion" name="fecha_inicio_inscripcion">
+                    <label for="fecha_fin">Fecha de Fin: *</label>
+                    <input type="date" id="fecha_fin" required>
                 </div>
+
                 <div class="form-group">
-                    <label for="fecha_fin_inscripcion">Fin de Inscripción:</label>
-                    <input type="date" id="fecha_fin_inscripcion" name="fecha_fin_inscripcion">
+                    <label for="estado">Estado: *</label>
+                    <select id="estado" required>
+                        <option value="">-- Seleccione --</option>
+                        <option value="PLANIFICADO">Planificado</option>
+                        <option value="ACTIVO">Activo</option>
+                        <option value="FINALIZADO">Finalizado</option>
+                    </select>
                 </div>
-                <div class="form-buttons">
-                    <button type="submit" class="btn btn-success">Guardar</button>
-                    <button type="button" class="btn btn-secondary" onclick="cerrarFormulario()">Cancelar</button>
+
+                <div style="grid-column:1/-1;display:flex;gap:1rem;">
+                    <button type="submit" class="btn btn-primary">
+                        <span id="btn-crear-text">Crear Período</span>
+                        <span id="btn-crear-loader" style="display:none;">Creando...</span>
+                    </button>
+                    <button type="reset" class="btn btn-secondary">Limpiar</button>
                 </div>
             </form>
         </div>
 
-        <table class="table">
-            <thead>
-                <tr>
-                    <th>Nombre</th>
-                    <th>Fecha Inicio</th>
-                    <th>Fecha Fin</th>
-                    <th>Inscripción</th>
-                    <th>Estado</th>
-                    <th>Acciones</th>
-                </tr>
-            </thead>
-            <tbody id="periodosTable">
-                <tr>
-                    <td colspan="6" style="text-align: center;">Cargando...</td>
-                </tr>
-            </tbody>
-        </table>
+        <hr>
+
+        <div class="table-section">
+            <h3>Períodos Académicos Registrados</h3>
+            <div style="overflow-x:auto;">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Código</th>
+                            <th>Nombre</th>
+                            <th>Fecha Inicio</th>
+                            <th>Fecha Fin</th>
+                            <th>Duración</th>
+                            <th>Estado</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody id="periodosTable">
+                        <tr>
+                            <td colspan="8" style="text-align:center;">Cargando períodos...</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
     </div>
 
-    <script src="/js/admin/periodos.js"></script>
+    <div id="editModal" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.5);z-index:1000;justify-content:center;align-items:center;">
+        <div style="background:white;padding:0;border-radius:10px;max-width:600px;width:90%;max-height:90vh;overflow-y:auto;">
+            <div style="display:flex;justify-content:space-between;align-items:center;padding:1.5rem;border-bottom:1px solid #eee;">
+                <h3 style="margin:0;color:#1e3c72;">Editar Período</h3>
+                <span onclick="cerrarModal()" style="font-size:2rem;cursor:pointer;color:#666;line-height:1;">&times;</span>
+            </div>
+            <form id="editForm" style="padding:1.5rem;">
+                <input type="hidden" id="edit_id_periodo">
+                
+                <div class="form-group">
+                    <label for="edit_codigo_periodo">Código:</label>
+                    <input type="text" id="edit_codigo_periodo" required maxlength="20">
+                </div>
+
+                <div class="form-group">
+                    <label for="edit_nombre_periodo">Nombre:</label>
+                    <input type="text" id="edit_nombre_periodo" required maxlength="50">
+                </div>
+
+                <div class="form-group">
+                    <label for="edit_fecha_inicio">Fecha de Inicio:</label>
+                    <input type="date" id="edit_fecha_inicio" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="edit_fecha_fin">Fecha de Fin:</label>
+                    <input type="date" id="edit_fecha_fin" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="edit_estado">Estado:</label>
+                    <select id="edit_estado">
+                        <option value="PLANIFICADO">Planificado</option>
+                        <option value="ACTIVO">Activo</option>
+                        <option value="FINALIZADO">Finalizado</option>
+                    </select>
+                </div>
+
+                <div style="border-top:1px solid #eee;padding-top:1rem;display:flex;gap:1rem;justify-content:flex-end;">
+                    <button type="button" class="btn btn-secondary" onclick="cerrarModal()">Cancelar</button>
+                    <button type="submit" class="btn btn-primary">Guardar Cambios</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="/js/admin/periodos.js?v=4"></script>
+    <style>
+        .notification.success{background:#d4edda;border-left:4px solid #28a745;color:#155724;}
+        .notification.error{background:#f8d7da;border-left:4px solid #dc3545;color:#721c24;}
+        .badge{padding:4px 10px;border-radius:12px;font-size:0.85rem;font-weight:500;}
+        .badge-success{background:#d4edda;color:#155724;}
+        .badge-warning{background:#fff3cd;color:#856404;}
+        .badge-danger{background:#f8d7da;color:#721c24;}
+        .btn-small{padding:0.4rem 0.8rem;font-size:0.85rem;margin-right:0.3rem;}
+        .btn-warning{background:#ffc107;color:#000;}
+        .btn-warning:hover{background:#e0a800;}
+    </style>
 </body>
 </html>

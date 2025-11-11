@@ -157,13 +157,13 @@ router.post('/api/carreras/crear', async (req, res) => {
 router.put('/api/carreras/:id_carrera', async (req, res) => {
   try {
     const { id_carrera } = req.params;
-    const { nombre_carrera, codigo_carrera, duracion_semestres, descripcion } = req.body;
+    const { nombre_carrera, codigo_carrera, duracion_semestres, descripcion, estado } = req.body;
 
-    if (!nombre_carrera && !codigo_carrera && !duracion_semestres && !descripcion) {
+    if (!nombre_carrera && !codigo_carrera && !duracion_semestres && !descripcion && !estado) {
       return res.status(400).json({ error: 'Al menos un campo es requerido' });
     }
 
-    await adminModel.editarCarrera(id_carrera, { nombre_carrera, codigo_carrera, duracion_semestres, descripcion });
+    await adminModel.editarCarrera(id_carrera, { nombre_carrera, codigo_carrera, duracion_semestres, descripcion, estado });
     res.json({ success: true, message: 'Carrera editada exitosamente' });
   } catch (err) {
     console.error('Error editando carrera:', err);
@@ -195,19 +195,28 @@ router.get('/api/materias', async (req, res) => {
 
 router.post('/api/materias/crear', async (req, res) => {
   try {
-    const { nombre_materia, codigo_materia, creditos, horas_teoricas, horas_practicas } = req.body;
+    const { nombre_materia, codigo_materia, creditos, horas_semanales, id_carrera, 
+            ciclo_recomendado, descripcion, id_docente } = req.body;
     
-    if (!nombre_materia || !codigo_materia || !creditos) {
-      return res.status(400).json({ error: 'Campos requeridos' });
+    if (!nombre_materia || !codigo_materia || !creditos || !id_carrera) {
+      return res.status(400).json({ error: 'Campos requeridos: nombre_materia, codigo_materia, creditos, id_carrera' });
     }
 
-    await adminModel.crearMateria({
+    const result = await adminModel.crearMateria({
       nombre_materia,
       codigo_materia,
       creditos,
-      horas_teoricas: horas_teoricas || 0,
-      horas_practicas: horas_practicas || 0
+      horas_semanales: horas_semanales || null,
+      id_carrera,
+      ciclo_recomendado: ciclo_recomendado || null,
+      descripcion: descripcion || null
     });
+
+    // Si se asignó un docente, crear grupo automáticamente
+    if (id_docente && result.success) {
+      // Aquí podrías crear un grupo por defecto si lo deseas
+      // Por ahora lo dejamos para manejo manual en grupos
+    }
 
     res.json({ success: true, message: 'Materia creada exitosamente' });
   } catch (err) {
@@ -219,13 +228,26 @@ router.post('/api/materias/crear', async (req, res) => {
 router.put('/api/materias/:id_materia', async (req, res) => {
   try {
     const { id_materia } = req.params;
-    const { nombre_materia, codigo_materia, creditos, horas_teoricas, horas_practicas, id_carrera } = req.body;
+    const { nombre_materia, codigo_materia, creditos, horas_semanales, id_carrera, 
+            ciclo_recomendado, descripcion, estado, id_docente } = req.body;
 
-    if (!nombre_materia && !codigo_materia && !creditos && !horas_teoricas && !horas_practicas && !id_carrera) {
+    if (!nombre_materia && !codigo_materia && !creditos && !horas_semanales && 
+        !id_carrera && !ciclo_recomendado && !descripcion && !estado && !id_docente) {
       return res.status(400).json({ error: 'Al menos un campo es requerido' });
     }
 
-    await adminModel.editarMateria(id_materia, { nombre_materia, codigo_materia, creditos, horas_teoricas, horas_practicas, id_carrera });
+    await adminModel.editarMateria(id_materia, { 
+      nombre_materia, 
+      codigo_materia, 
+      creditos, 
+      horas_semanales, 
+      id_carrera, 
+      ciclo_recomendado, 
+      descripcion, 
+      estado,
+      id_docente
+    });
+
     res.json({ success: true, message: 'Materia editada exitosamente' });
   } catch (err) {
     console.error('Error editando materia:', err);
@@ -257,18 +279,18 @@ router.get('/api/periodos', async (req, res) => {
 
 router.post('/api/periodos/crear', async (req, res) => {
   try {
-    const { nombre_periodo, fecha_inicio, fecha_fin, fecha_inicio_inscripcion, fecha_fin_inscripcion } = req.body;
+    const { codigo_periodo, nombre_periodo, fecha_inicio, fecha_fin, estado } = req.body;
     
-    if (!nombre_periodo || !fecha_inicio || !fecha_fin) {
+    if (!codigo_periodo || !nombre_periodo || !fecha_inicio || !fecha_fin || !estado) {
       return res.status(400).json({ error: 'Campos requeridos' });
     }
 
     await adminModel.crearPeriodo({
+      codigo_periodo,
       nombre_periodo,
       fecha_inicio,
       fecha_fin,
-      fecha_inicio_inscripcion,
-      fecha_fin_inscripcion
+      estado
     });
 
     res.json({ success: true, message: 'Período creado exitosamente' });
@@ -281,13 +303,13 @@ router.post('/api/periodos/crear', async (req, res) => {
 router.put('/api/periodos/:id_periodo', async (req, res) => {
   try {
     const { id_periodo } = req.params;
-    const { nombre_periodo, fecha_inicio, fecha_fin } = req.body;
+    const { codigo_periodo, nombre_periodo, fecha_inicio, fecha_fin, estado } = req.body;
 
-    if (!nombre_periodo && !fecha_inicio && !fecha_fin) {
+    if (!codigo_periodo && !nombre_periodo && !fecha_inicio && !fecha_fin && !estado) {
       return res.status(400).json({ error: 'Al menos un campo es requerido' });
     }
 
-    await adminModel.editarPeriodo(id_periodo, { nombre_periodo, fecha_inicio, fecha_fin });
+    await adminModel.editarPeriodo(id_periodo, { codigo_periodo, nombre_periodo, fecha_inicio, fecha_fin, estado });
     res.json({ success: true, message: 'Período editado exitosamente' });
   } catch (err) {
     console.error('Error editando período:', err);
@@ -331,7 +353,7 @@ router.get('/api/alumnos', async (req, res) => {
 
 router.post('/api/alumnos/crear', async (req, res) => {
   try {
-    const { nombre_usuario, contrasena, carnet, nombres, apellidos, email, telefono, fecha_nacimiento, direccion, carrera } = req.body;
+    const { nombre_usuario, contrasena, carnet, nombres, apellidos, email, telefono, fecha_nacimiento, direccion, id_carrera } = req.body;
     
     if (!nombre_usuario || !contrasena || !carnet || !nombres || !apellidos || !email) {
       return res.status(400).json({ error: 'Campos requeridos: nombre_usuario, contrasena, carnet, nombres, apellidos, email' });
@@ -347,7 +369,7 @@ router.post('/api/alumnos/crear', async (req, res) => {
       telefono,
       fecha_nacimiento,
       direccion,
-      carrera
+      id_carrera
     });
 
     res.json({ success: true, message: 'Alumno creado exitosamente', id_usuario: resultado.id_usuario });
@@ -364,13 +386,13 @@ router.post('/api/alumnos/crear', async (req, res) => {
 router.put('/api/alumnos/:id_alumno', async (req, res) => {
   try {
     const { id_alumno } = req.params;
-    const { carnet, nombres, apellidos, email, telefono, fecha_nacimiento, direccion, carrera, estado } = req.body;
+    const { carnet, nombres, apellidos, email, telefono, fecha_nacimiento, direccion, id_carrera, estado } = req.body;
 
-    if (!carnet && !nombres && !apellidos && !email && !telefono && !fecha_nacimiento && !direccion && !carrera && !estado) {
+    if (!carnet && !nombres && !apellidos && !email && !telefono && !fecha_nacimiento && !direccion && !id_carrera && !estado) {
       return res.status(400).json({ error: 'Al menos un campo es requerido' });
     }
 
-    await adminModel.editarAlumno(id_alumno, { carnet, nombres, apellidos, email, telefono, fecha_nacimiento, direccion, carrera, estado });
+    await adminModel.editarAlumno(id_alumno, { carnet, nombres, apellidos, email, telefono, fecha_nacimiento, direccion, id_carrera, estado });
     res.json({ success: true, message: 'Alumno editado exitosamente' });
   } catch (err) {
     console.error('Error editando alumno:', err);

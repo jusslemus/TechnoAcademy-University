@@ -3,49 +3,97 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Mis Inscripciones - TechnoAcademy</title>
+  <title>Mis Materias - TechnoAcademy</title>
   <link rel="stylesheet" href="/css/style.css">
 </head>
 <body>
   <nav class="navbar">
     <div class="nav-container">
-      <h1>🎓 TechnoAcademy - Alumno</h1>
+      <div class="nav-brand">
+        <svg class="logo-icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M22 10v6M2 10l10-5 10 5-10 5z"></path>
+          <path d="M6 12v5c3 3 9 3 12 0v-5"></path>
+        </svg>
+        <h1>TechnoAcademy - Alumno</h1>
+      </div>
       <ul class="nav-menu">
         <li><a href="/alumno/dashboard">Dashboard</a></li>
-        <li><a href="/alumno/inscripciones">Mis Inscripciones</a></li>
-        <li><a href="/alumno/materias">Materias Disponibles</a></li>
+        <li><a href="/alumno/inscripciones" class="active">Mis Materias</a></li>
+        <li><a href="/alumno/calificaciones">Calificaciones</a></li>
+        <li><a href="/alumno/horario">Horario</a></li>
+        <li><a href="/alumno/pagos">Pagos</a></li>
         <li><a href="/logout">Cerrar Sesión</a></li>
       </ul>
     </div>
   </nav>
 
   <div class="container">
-    <h2>📚 Mis Inscripciones</h2>
+    <div id="notification" style="display:none;padding:1rem;border-radius:5px;margin-bottom:1rem;"></div>
 
-    <table class="table">
-      <thead>
-        <tr>
-          <th>Código</th>
-          <th>Materia</th>
-          <th>Sección</th>
-          <th>Docente</th>
-          <th>Horario</th>
-          <th>Estado</th>
-          <th>Acciones</th>
-        </tr>
-      </thead>
-      <tbody id="inscripcionesTable">
-        <tr>
-          <td colspan="7">Cargando tus inscripciones...</td>
-        </tr>
-      </tbody>
-    </table>
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
+      <div>
+        <h2 style="color: #1e3c72; margin: 0;">Mis Materias Inscritas</h2>
+        <p style="color: #666; margin: 0.5rem 0 0 0;">
+          Total de Créditos: <strong id="totalCreditos" style="color: #1e3c72; font-size: 1.1rem;">0</strong>
+        </p>
+      </div>
+      <a href="/alumno/materias" class="btn btn-primary" style="display: flex; align-items: center; gap: 0.5rem;">
+        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="12" y1="5" x2="12" y2="19"></line>
+          <line x1="5" y1="12" x2="19" y2="12"></line>
+        </svg>
+        Inscribir Materias
+      </a>
+    </div>
 
-    <h3>Total de Créditos: <span id="totalCreditos">0</span></h3>
+    <div class="table-section">
+      <div style="overflow-x:auto;">
+        <table class="table">
+          <thead>
+            <tr>
+              <th>Código</th>
+              <th>Materia</th>
+              <th>Créditos</th>
+              <th>Grupo</th>
+              <th>Docente</th>
+              <th>Horario</th>
+              <th>Aula</th>
+              <th>Estado</th>
+              <th>Nota</th>
+              <th>Acciones</th>
+            </tr>
+          </thead>
+          <tbody id="inscripcionesTable">
+            <tr>
+              <td colspan="10" style="text-align: center; padding: 2rem; color: #999;">
+                Cargando tus materias inscritas...
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
 
-    <a href="/alumno/materias" class="btn btn-primary">Inscribir Más Materias</a>
+    <div style="margin-top: 2rem; padding: 1rem; background: #f8f9fa; border-radius: 8px; border-left: 4px solid #1e3c72;">
+      <h4 style="margin: 0 0 0.5rem 0; color: #1e3c72;">Información Importante</h4>
+      <ul style="margin: 0; padding-left: 1.5rem; color: #666; font-size: 0.9rem;">
+        <li>Puedes inscribir materias hasta el inicio del período académico</li>
+        <li>El retiro de materias está sujeto a las políticas académicas</li>
+        <li>Verifica tu horario para evitar cruces de clases</li>
+      </ul>
+    </div>
   </div>
 
-  <script src="/js/alumno/inscripciones.js"></script>
+  <script src="/js/alumno/inscripciones.js?v=2"></script>
+  
+  <style>
+    .notification.success{background:#d4edda;border-left:4px solid #28a745;color:#155724;}
+    .notification.error{background:#f8d7da;border-left:4px solid #dc3545;color:#721c24;}
+    .badge{padding:4px 10px;border-radius:12px;font-size:0.85rem;font-weight:500;display:inline-block;}
+    .badge-success{background:#d4edda;color:#155724;}
+    .badge-warning{background:#fff3cd;color:#856404;}
+    .badge-inactive{background:#f8d7da;color:#721c24;}
+    .btn-small{padding:0.4rem 0.8rem;font-size:0.85rem;}
+  </style>
 </body>
 </html>

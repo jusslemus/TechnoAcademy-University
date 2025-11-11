@@ -6,7 +6,7 @@ const path = require('path');
 const db = require('./config/database');
 
 // Middleware de autenticación
-const { isAuthenticated, isAdmin, isAlumno } = require('./middleware/auth');
+const { isAuthenticated, isAdmin, isAlumno, isDocente } = require('./middleware/auth');
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -48,13 +48,26 @@ app.use('/admin', isAuthenticated, isAdmin, require('./routes/admin'));
 // Rutas protegidas - Alumno
 app.use('/alumno', isAuthenticated, isAlumno, require('./routes/alumno'));
 
+// Rutas protegidas - Docente
+app.use('/docente', isAuthenticated, isDocente, require('./routes/docente'));
+
 // Rutas protegidas - Usuario general
 app.use('/usuario', isAuthenticated, require('./routes/usuario'));
 
 // Página de inicio
 app.get('/', (req, res) => {
   if (req.session && req.session.usuario) {
-    res.redirect(`/${req.session.usuario.tipo_usuario.toLowerCase()}/dashboard`);
+    const tipo = req.session.usuario.tipo_usuario.toLowerCase();
+    // Redirigir según tipo de usuario
+    if (tipo === 'admin') {
+      res.redirect('/admin/dashboard');
+    } else if (tipo === 'alumno') {
+      res.redirect('/alumno/dashboard');
+    } else if (tipo === 'docente') {
+      res.redirect('/docente/dashboard');
+    } else {
+      res.redirect('/usuario/dashboard');
+    }
   } else {
     res.redirect('/login');
   }

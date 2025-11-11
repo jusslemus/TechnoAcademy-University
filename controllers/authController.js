@@ -51,6 +51,8 @@ async function login(req, res) {
       redirectUrl = '/admin/dashboard';
     } else if (usuario.TIPO_USUARIO === 'ALUMNO') {
       redirectUrl = '/alumno/dashboard';
+    } else if (usuario.TIPO_USUARIO === 'DOCENTE') {
+      redirectUrl = '/docente/dashboard';
     }
 
     // Responder con JSON si es AJAX, sino redirigir

@@ -1,84 +1,210 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gestionar Materias - TechnoAcademy University</title>
-    <link rel="stylesheet" href="/css/style.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Gestionar Materias - Admin</title>
+  <link rel="stylesheet" href="/css/style.css">
 </head>
 <body>
-    <nav class="navbar">
-        <div class="nav-container">
-            <div class="logo">🎓 TechnoAcademy University</div>
-            <div class="nav-links">
-                <a href="/admin/dashboard">Dashboard</a>
-                <a href="/logout">Cerrar Sesión</a>
-            </div>
-        </div>
-    </nav>
+  <nav class="navbar">
+    <div class="nav-container">
+      <h1>🎓 TechnoAcademy - Admin</h1>
+      <ul class="nav-menu">
+        <li><a href="/admin/dashboard">Dashboard</a></li>
+        <li><a href="/admin/alumnos">Alumnos</a></li>
+        <li><a href="/admin/docentes">Docentes</a></li>
+        <li><a href="/admin/carreras">Carreras</a></li>
+        <li><a href="/admin/materias" class="active">Materias</a></li>
+        <li><a href="/admin/periodos">Períodos</a></li>
+        <li><a href="/logout">Cerrar Sesión</a></li>
+      </ul>
+    </div>
+  </nav>
 
-    <div class="container">
-        <h1>Gestionar Materias</h1>
-        
-        <div class="action-buttons">
-            <button class="btn btn-primary" onclick="abrirFormularioNuevaMateria()">+ Nueva Materia</button>
-        </div>
+  <div class="container">
+    <div id="notification" style="display:none;padding:1rem;border-radius:5px;margin-bottom:1rem;"></div>
 
-        <div id="formularioContainer" class="form-container" style="display: none;">
-            <h2>Nueva Materia</h2>
-            <form id="formMateria" onsubmit="guardarMateria(event)">
-                <div class="form-group">
-                    <label for="carrera">Carrera:</label>
-                    <select id="carrera" name="carrera" required>
-                        <option value="">Seleccionar carrera...</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label for="nombre_materia">Nombre de Materia:</label>
-                    <input type="text" id="nombre_materia" name="nombre_materia" required>
-                </div>
-                <div class="form-group">
-                    <label for="codigo_materia">Código:</label>
-                    <input type="text" id="codigo_materia" name="codigo_materia" required>
-                </div>
-                <div class="form-group">
-                    <label for="creditos">Créditos:</label>
-                    <input type="number" id="creditos" name="creditos" min="1" max="10" required>
-                </div>
-                <div class="form-group">
-                    <label for="horas_teoricas">Horas Teóricas:</label>
-                    <input type="number" id="horas_teoricas" name="horas_teoricas" min="0" required>
-                </div>
-                <div class="form-group">
-                    <label for="horas_practicas">Horas Prácticas:</label>
-                    <input type="number" id="horas_practicas" name="horas_practicas" min="0" required>
-                </div>
-                <div class="form-buttons">
-                    <button type="submit" class="btn btn-success">Guardar</button>
-                    <button type="button" class="btn btn-secondary" onclick="cerrarFormulario()">Cancelar</button>
-                </div>
-            </form>
-        </div>
+    <h2>📚 Gestionar Materias</h2>
 
-        <table class="table">
-            <thead>
-                <tr>
-                    <th>Código</th>
-                    <th>Nombre</th>
-                    <th>Créditos</th>
-                    <th>Horas Teóricas</th>
-                    <th>Horas Prácticas</th>
-                    <th>Acciones</th>
-                </tr>
-            </thead>
-            <tbody id="materiasTable">
-                <tr>
-                    <td colspan="6" style="text-align: center;">Cargando...</td>
-                </tr>
-            </tbody>
-        </table>
+    <div style="margin-bottom:2rem;">
+      <input type="text" id="searchInput" placeholder="🔍 Buscar por código o nombre..." 
+             style="width:100%;max-width:400px;padding:0.75rem;border:1px solid #c8d0d8;border-radius:5px;font-size:1rem;">
     </div>
 
-    <script src="/js/admin/materias.js"></script>
+    <div class="form-section">
+      <h3>➕ Crear Nueva Materia</h3>
+      <form id="materiaForm">
+        <div class="form-group">
+          <label for="codigo_materia">Código: *</label>
+          <input type="text" id="codigo_materia" required placeholder="Ej: MAT101" maxlength="20">
+          <small>Código único de la materia</small>
+        </div>
+
+        <div class="form-group">
+          <label for="nombre_materia">Nombre de la Materia: *</label>
+          <input type="text" id="nombre_materia" required placeholder="Ej: Cálculo I">
+        </div>
+
+        <div class="form-group">
+          <label for="id_carrera">Carrera: *</label>
+          <select id="id_carrera" required>
+            <option value="">-- Seleccione una carrera --</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="id_docente">Docente Asignado:</label>
+          <select id="id_docente">
+            <option value="">-- Sin asignar --</option>
+          </select>
+          <small>Opcional: Puede asignarse después</small>
+        </div>
+
+        <div class="form-group">
+          <label for="creditos">Créditos: *</label>
+          <input type="number" id="creditos" required placeholder="Ej: 4" min="1" max="10">
+        </div>
+
+        <div class="form-group">
+          <label for="horas_semanales">Horas Semanales:</label>
+          <input type="number" id="horas_semanales" placeholder="Ej: 5" min="0" max="40">
+        </div>
+
+        <div class="form-group">
+          <label for="ciclo_recomendado">Ciclo Recomendado:</label>
+          <input type="number" id="ciclo_recomendado" placeholder="Ej: 1" min="1" max="12">
+          <small>Semestre o ciclo sugerido</small>
+        </div>
+
+        <div class="form-group" style="grid-column:1/-1;">
+          <label for="descripcion">Descripción:</label>
+          <textarea id="descripcion" rows="3" placeholder="Descripción de la materia..."></textarea>
+        </div>
+
+        <div style="grid-column:1/-1;display:flex;gap:1rem;">
+          <button type="submit" class="btn btn-primary">
+            <span id="btn-crear-text">✅ Crear Materia</span>
+            <span id="btn-crear-loader" style="display:none;">Creando...</span>
+          </button>
+          <button type="reset" class="btn btn-secondary">🔄 Limpiar</button>
+        </div>
+      </form>
+    </div>
+
+    <hr>
+
+    <div class="table-section">
+      <h3>📋 Materias Registradas</h3>
+      <div style="overflow-x:auto;">
+        <table class="table">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Código</th>
+              <th>Nombre de la Materia</th>
+              <th>Carrera</th>
+              <th>Docente</th>
+              <th>Créditos</th>
+              <th>Ciclo</th>
+              <th>Estado</th>
+              <th>Acciones</th>
+            </tr>
+          </thead>
+          <tbody id="materiasTable">
+            <tr>
+              <td colspan="9" style="text-align:center;">Cargando materias...</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal de Edición -->
+  <div id="editModal" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.5);z-index:1000;justify-content:center;align-items:center;">
+    <div style="background:white;padding:0;border-radius:10px;max-width:700px;width:90%;max-height:90vh;overflow-y:auto;">
+      <div style="display:flex;justify-content:space-between;align-items:center;padding:1.5rem;border-bottom:1px solid #eee;">
+        <h3 style="margin:0;color:#1e3c72;">✏️ Editar Materia</h3>
+        <span onclick="cerrarModal()" style="font-size:2rem;cursor:pointer;color:#666;line-height:1;">&times;</span>
+      </div>
+      <form id="editForm" style="padding:1.5rem;">
+        <input type="hidden" id="edit_id_materia">
+        
+        <div class="form-group">
+          <label for="edit_codigo_materia">Código:</label>
+          <input type="text" id="edit_codigo_materia" required maxlength="20">
+        </div>
+
+        <div class="form-group">
+          <label for="edit_nombre_materia">Nombre de la Materia:</label>
+          <input type="text" id="edit_nombre_materia" required>
+        </div>
+
+        <div class="form-group">
+          <label for="edit_id_carrera">Carrera:</label>
+          <select id="edit_id_carrera" required>
+            <option value="">-- Seleccione --</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="edit_id_docente">Docente Asignado:</label>
+          <select id="edit_id_docente">
+            <option value="">-- Sin asignar --</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="edit_creditos">Créditos:</label>
+          <input type="number" id="edit_creditos" required min="1" max="10">
+        </div>
+
+        <div class="form-group">
+          <label for="edit_horas_semanales">Horas Semanales:</label>
+          <input type="number" id="edit_horas_semanales" min="0" max="40">
+        </div>
+
+        <div class="form-group">
+          <label for="edit_ciclo_recomendado">Ciclo Recomendado:</label>
+          <input type="number" id="edit_ciclo_recomendado" min="1" max="12">
+        </div>
+
+        <div class="form-group">
+          <label for="edit_estado">Estado:</label>
+          <select id="edit_estado">
+            <option value="ACTIVA">Activa</option>
+            <option value="INACTIVA">Inactiva</option>
+          </select>
+        </div>
+
+        <div class="form-group" style="grid-column:1/-1;">
+          <label for="edit_descripcion">Descripción:</label>
+          <textarea id="edit_descripcion" rows="3"></textarea>
+        </div>
+
+        <div style="border-top:1px solid #eee;padding-top:1rem;display:flex;gap:1rem;justify-content:flex-end;">
+          <button type="button" class="btn btn-secondary" onclick="cerrarModal()">Cancelar</button>
+          <button type="submit" class="btn btn-primary">💾 Guardar Cambios</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script src="/js/admin/materias.js?v=4"></script>
+  <style>
+    .notification.success{background:#d4edda;border-left:4px solid #28a745;color:#155724;}
+    .notification.error{background:#f8d7da;border-left:4px solid #dc3545;color:#721c24;}
+    .badge{padding:4px 10px;border-radius:12px;font-size:0.85rem;font-weight:500;}
+    .badge-success{background:#d4edda;color:#155724;}
+    .badge-inactive{background:#f8d7da;color:#721c24;}
+    .btn-small{padding:0.4rem 0.8rem;font-size:0.85rem;margin-right:0.3rem;}
+    .btn-warning{background:#ffc107;color:#000;}
+    .btn-warning:hover{background:#e0a800;}
+    table td:nth-child(3){max-width:200px;}
+    table td:nth-child(4){max-width:180px;}
+  </style>
 </body>
 </html>
+
+

@@ -3,15 +3,47 @@
 // ============================================
 
 let todosLosAlumnos = [];
+let todasLasCarreras = [];
 
 // ===== INICIALIZACIÓN =====
 document.addEventListener("DOMContentLoaded", function() {
+  cargarCarreras();
   cargarAlumnos();
   
   document.getElementById("alumnoForm").addEventListener("submit", crearAlumno);
   document.getElementById("editForm").addEventListener("submit", guardarEdicion);
   document.getElementById("searchInput").addEventListener("input", filtrarAlumnos);
 });
+
+// ===== CARGAR CARRERAS =====
+async function cargarCarreras() {
+  try {
+    const response = await fetch("/admin/api/carreras");
+    const carreras = await response.json();
+    todasLasCarreras = carreras;
+    
+    const selectCrear = document.getElementById("id_carrera");
+    const selectEditar = document.getElementById("edit_id_carrera");
+    
+    // Limpiar opciones existentes excepto la primera
+    selectCrear.innerHTML = `<option value="">-- Seleccione una carrera --</option>`;
+    selectEditar.innerHTML = `<option value="">-- Sin carrera --</option>`;
+    
+    carreras.forEach(carrera => {
+      const option1 = document.createElement("option");
+      option1.value = carrera.ID_CARRERA;
+      option1.textContent = carrera.NOMBRE_CARRERA;
+      selectCrear.appendChild(option1);
+      
+      const option2 = document.createElement("option");
+      option2.value = carrera.ID_CARRERA;
+      option2.textContent = carrera.NOMBRE_CARRERA;
+      selectEditar.appendChild(option2);
+    });
+  } catch (error) {
+    console.error("Error al cargar carreras:", error);
+  }
+}
 
 // ===== CARGAR ALUMNOS =====
 async function cargarAlumnos() {
@@ -37,11 +69,12 @@ function mostrarAlumnos(alumnos) {
     return;
   }
   
-  tbody.innerHTML = alumnos.map(alumno => {
+  tbody.innerHTML = alumnos.map((alumno, index) => {
     const nombreCompleto = `${alumno.NOMBRES || ""} ${alumno.APELLIDOS || ""}`;
+    const nombreCompletoEscaped = nombreCompleto.replace(/"/g, "&quot;").replace(/'/g, "&#39;");
     const badgeClass = alumno.ESTADO === "ACTIVO" ? "badge-success" : "badge-inactive";
     const usuario = alumno.NOMBRE_USUARIO || "Sin usuario";
-    const carrera = alumno.CARRERA || "Sin carrera";
+    const carrera = alumno.NOMBRE_CARRERA || "Sin carrera";
     
     return `
       <tr>
@@ -54,16 +87,22 @@ function mostrarAlumnos(alumnos) {
         <td><small>${usuario}</small></td>
         <td><span class="badge ${badgeClass}">${alumno.ESTADO || "ACTIVO"}</span></td>
         <td>
-          <button class="btn btn-small btn-warning" onclick='"'"'abrirModalEditar(${JSON.stringify(alumno).replace(/'"'"'/g, "&apos;")}))'"'"'>
+          <button class="btn btn-small btn-warning" onclick="abrirModalEditarPorId(${index})">
              Editar
           </button>
-          <button class="btn btn-small btn-danger" onclick="eliminarAlumno(${alumno.ID_ALUMNO}, '"'"'${nombreCompleto}'"'"')">
+          <button class="btn btn-small btn-danger" onclick="eliminarAlumno(${alumno.ID_ALUMNO}, '${nombreCompletoEscaped}')">
              Eliminar
           </button>
         </td>
       </tr>
     `;
   }).join("");
+}
+
+// ===== ABRIR MODAL EDITAR POR ÍNDICE =====
+function abrirModalEditarPorId(index) {
+  const alumno = todosLosAlumnos[index];
+  abrirModalEditar(alumno);
 }
 
 // ===== CREAR ALUMNO =====
@@ -79,10 +118,15 @@ async function crearAlumno(e) {
   const telefono = document.getElementById("telefono").value.trim();
   const fecha_nacimiento = document.getElementById("fecha_nacimiento").value;
   const direccion = document.getElementById("direccion").value.trim();
-  const carrera = document.getElementById("carrera").value.trim();
+  const id_carrera = document.getElementById("id_carrera").value;
   
   if (contrasena.length < 6) {
     mostrarNotificacion("La contraseña debe tener al menos 6 caracteres", "error");
+    return;
+  }
+  
+  if (!id_carrera) {
+    mostrarNotificacion("Debe seleccionar una carrera", "error");
     return;
   }
   
@@ -107,7 +151,7 @@ async function crearAlumno(e) {
         telefono: telefono || null,
         fecha_nacimiento: fecha_nacimiento || null,
         direccion: direccion || null,
-        carrera: carrera || null
+        id_carrera: parseInt(id_carrera)
       })
     });
     
@@ -139,7 +183,7 @@ function abrirModalEditar(alumno) {
   document.getElementById("edit_telefono").value = alumno.TELEFONO || "";
   document.getElementById("edit_fecha_nacimiento").value = alumno.FECHA_NACIMIENTO ? alumno.FECHA_NACIMIENTO.split("T")[0] : "";
   document.getElementById("edit_direccion").value = alumno.DIRECCION || "";
-  document.getElementById("edit_carrera").value = alumno.CARRERA || "";
+  document.getElementById("edit_id_carrera").value = alumno.ID_CARRERA || "";
   document.getElementById("edit_estado").value = alumno.ESTADO || "ACTIVO";
   
   document.getElementById("editModal").style.display = "flex";
@@ -162,7 +206,7 @@ async function guardarEdicion(e) {
   const telefono = document.getElementById("edit_telefono").value.trim();
   const fecha_nacimiento = document.getElementById("edit_fecha_nacimiento").value;
   const direccion = document.getElementById("edit_direccion").value.trim();
-  const carrera = document.getElementById("edit_carrera").value.trim();
+  const id_carrera = document.getElementById("edit_id_carrera").value;
   const estado = document.getElementById("edit_estado").value;
   
   try {
@@ -179,7 +223,7 @@ async function guardarEdicion(e) {
         telefono: telefono || null,
         fecha_nacimiento: fecha_nacimiento || null,
         direccion: direccion || null,
-        carrera: carrera || null,
+        id_carrera: id_carrera ? parseInt(id_carrera) : null,
         estado
       })
     });

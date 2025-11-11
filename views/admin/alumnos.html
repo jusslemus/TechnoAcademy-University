@@ -1,205 +1,216 @@
 ﻿<!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Gestionar Alumnos - Admin</title>
-  <link rel="stylesheet" href="/css/style.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestionar Alumnos - Admin</title>
+    <link rel="stylesheet" href="/css/style.css">
 </head>
 <body>
-  <nav class="navbar">
-    <div class="nav-container">
-      <h1> TechnoAcademy - Admin</h1>
-      <ul class="nav-menu">
-        <li><a href="/admin/dashboard">Dashboard</a></li>
-        <li><a href="/admin/alumnos" class="active">Alumnos</a></li>
-        <li><a href="/admin/docentes">Docentes</a></li>
-        <li><a href="/admin/carreras">Carreras</a></li>
-        <li><a href="/admin/materias">Materias</a></li>
-        <li><a href="/admin/periodos">Períodos</a></li>
-        <li><a href="/logout">Cerrar Sesión</a></li>
-      </ul>
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="nav-brand">
+                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M22 10v6M2 10l10-5 10 5-10 5z"></path>
+                    <path d="M6 12v5c3 3 9 3 12 0v-5"></path>
+                </svg>
+                <h1>TechnoAcademy</h1>
+            </div>
+            <ul class="nav-menu">
+                <li><a href="/admin/dashboard">Dashboard</a></li>
+                <li><a href="/admin/docentes">Docentes</a></li>
+                <li><a href="/admin/carreras">Carreras</a></li>
+                <li><a href="/admin/materias">Materias</a></li>
+                <li><a href="/admin/periodos">Períodos</a></li>
+                <li><a href="/admin/alumnos" class="active">Alumnos</a></li>
+                <li><a href="/logout" class="btn-logout">Cerrar Sesión</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div id="notification" style="display:none;padding:1rem;border-radius:5px;margin-bottom:1rem;"></div>
+
+        <h2>Gestionar Alumnos</h2>
+
+        <div style="margin-bottom:2rem;">
+            <input type="text" id="searchInput" placeholder="Buscar por carnet, nombre o email..." 
+                   style="width:100%;max-width:400px;padding:0.75rem;border:1px solid #c8d0d8;border-radius:5px;font-size:1rem;">
+        </div>
+
+        <div class="form-section">
+            <h3>Crear Nuevo Alumno</h3>
+            <form id="alumnoForm">
+                <div class="form-group">
+                    <label for="nombre_usuario">Usuario: *</label>
+                    <input type="text" id="nombre_usuario" required placeholder="Ej: alumno2025" minlength="4">
+                    <small>Mínimo 4 caracteres</small>
+                </div>
+
+                <div class="form-group">
+                    <label for="contrasena">Contraseña: *</label>
+                    <input type="password" id="contrasena" required placeholder="Mínimo 6 caracteres" minlength="6">
+                </div>
+
+                <div class="form-group">
+                    <label for="carnet">Carnet: *</label>
+                    <input type="text" id="carnet" required placeholder="Ej: 2025-0001">
+                </div>
+
+                <div class="form-group">
+                    <label for="nombres">Nombres: *</label>
+                    <input type="text" id="nombres" required placeholder="Nombres del alumno">
+                </div>
+
+                <div class="form-group">
+                    <label for="apellidos">Apellidos: *</label>
+                    <input type="text" id="apellidos" required placeholder="Apellidos del alumno">
+                </div>
+
+                <div class="form-group">
+                    <label for="email">Email: *</label>
+                    <input type="email" id="email" required placeholder="correo@ejemplo.com">
+                </div>
+
+                <div class="form-group">
+                    <label for="telefono">Teléfono:</label>
+                    <input type="tel" id="telefono" placeholder="Ej: 7788-9900">
+                </div>
+
+                <div class="form-group">
+                    <label for="fecha_nacimiento">Fecha de Nacimiento:</label>
+                    <input type="date" id="fecha_nacimiento">
+                </div>
+
+                <div class="form-group">
+                    <label for="direccion">Dirección:</label>
+                    <textarea id="direccion" rows="2" placeholder="Dirección completa"></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label for="id_carrera">Carrera: *</label>
+                    <select id="id_carrera" required>
+                        <option value="">-- Seleccione una carrera --</option>
+                    </select>
+                </div>
+
+                <div style="grid-column:1/-1;display:flex;gap:1rem;">
+                    <button type="submit" class="btn btn-primary">
+                        <span id="btn-crear-text">Crear Alumno</span>
+                        <span id="btn-crear-loader" style="display:none;">Creando...</span>
+                    </button>
+                    <button type="reset" class="btn btn-secondary">Limpiar</button>
+                </div>
+            </form>
+        </div>
+
+        <hr>
+
+        <div class="table-section">
+            <h3>Alumnos Registrados</h3>
+            <div style="overflow-x:auto;">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Carnet</th>
+                            <th>Nombre Completo</th>
+                            <th>Email</th>
+                            <th>Teléfono</th>
+                            <th>Carrera</th>
+                            <th>Usuario</th>
+                            <th>Estado</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody id="alumnosTable">
+                        <tr>
+                            <td colspan="9" style="text-align:center;">Cargando alumnos...</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
     </div>
-  </nav>
 
-  <div class="container">
-    <div id="notification" style="display:none;padding:1rem;border-radius:5px;margin-bottom:1rem;"></div>
+    <div id="editModal" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.5);z-index:1000;justify-content:center;align-items:center;">
+        <div style="background:white;padding:0;border-radius:10px;max-width:600px;width:90%;max-height:90vh;overflow-y:auto;">
+            <div style="display:flex;justify-content:space-between;align-items:center;padding:1.5rem;border-bottom:1px solid #eee;">
+                <h3 style="margin:0;color:#1e3c72;">Editar Alumno</h3>
+                <span onclick="cerrarModal()" style="font-size:2rem;cursor:pointer;color:#666;line-height:1;">&times;</span>
+            </div>
+            <form id="editForm" style="padding:1.5rem;">
+                <input type="hidden" id="edit_id_alumno">
+                
+                <div class="form-group">
+                    <label for="edit_carnet">Carnet:</label>
+                    <input type="text" id="edit_carnet" required>
+                </div>
 
-    <h2> Gestionar Alumnos</h2>
+                <div class="form-group">
+                    <label for="edit_nombres">Nombres:</label>
+                    <input type="text" id="edit_nombres" required>
+                </div>
 
-    <div style="margin-bottom:2rem;">
-      <input type="text" id="searchInput" placeholder=" Buscar por carnet, nombre o email..." 
-             style="width:100%;max-width:400px;padding:0.75rem;border:1px solid #c8d0d8;border-radius:5px;font-size:1rem;">
+                <div class="form-group">
+                    <label for="edit_apellidos">Apellidos:</label>
+                    <input type="text" id="edit_apellidos" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="edit_email">Email:</label>
+                    <input type="email" id="edit_email" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="edit_telefono">Teléfono:</label>
+                    <input type="tel" id="edit_telefono">
+                </div>
+
+                <div class="form-group">
+                    <label for="edit_fecha_nacimiento">Fecha de Nacimiento:</label>
+                    <input type="date" id="edit_fecha_nacimiento">
+                </div>
+
+                <div class="form-group">
+                    <label for="edit_direccion">Dirección:</label>
+                    <textarea id="edit_direccion" rows="2"></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label for="edit_id_carrera">Carrera:</label>
+                    <select id="edit_id_carrera">
+                        <option value="">-- Seleccione una carrera --</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="edit_estado">Estado:</label>
+                    <select id="edit_estado">
+                        <option value="ACTIVO">Activo</option>
+                        <option value="INACTIVO">Inactivo</option>
+                    </select>
+                </div>
+
+                <div style="border-top:1px solid #eee;padding-top:1rem;display:flex;gap:1rem;justify-content:flex-end;">
+                    <button type="button" class="btn btn-secondary" onclick="cerrarModal()">Cancelar</button>
+                    <button type="submit" class="btn btn-primary">Guardar Cambios</button>
+                </div>
+            </form>
+        </div>
     </div>
 
-    <div class="form-section">
-      <h3> Crear Nuevo Alumno</h3>
-      <form id="alumnoForm">
-        <div class="form-group">
-          <label for="nombre_usuario">Usuario: *</label>
-          <input type="text" id="nombre_usuario" required placeholder="Ej: alumno2025" minlength="4">
-          <small>Mínimo 4 caracteres</small>
-        </div>
-
-        <div class="form-group">
-          <label for="contrasena">Contraseña: *</label>
-          <input type="password" id="contrasena" required placeholder="Mínimo 6 caracteres" minlength="6">
-        </div>
-
-        <div class="form-group">
-          <label for="carnet">Carnet: *</label>
-          <input type="text" id="carnet" required placeholder="Ej: 2025-0001">
-        </div>
-
-        <div class="form-group">
-          <label for="nombres">Nombres: *</label>
-          <input type="text" id="nombres" required placeholder="Nombres del alumno">
-        </div>
-
-        <div class="form-group">
-          <label for="apellidos">Apellidos: *</label>
-          <input type="text" id="apellidos" required placeholder="Apellidos del alumno">
-        </div>
-
-        <div class="form-group">
-          <label for="email">Email: *</label>
-          <input type="email" id="email" required placeholder="correo@ejemplo.com">
-        </div>
-
-        <div class="form-group">
-          <label for="telefono">Teléfono:</label>
-          <input type="tel" id="telefono" placeholder="Ej: 7788-9900">
-        </div>
-
-        <div class="form-group">
-          <label for="fecha_nacimiento">Fecha de Nacimiento:</label>
-          <input type="date" id="fecha_nacimiento">
-        </div>
-
-        <div class="form-group">
-          <label for="direccion">Dirección:</label>
-          <textarea id="direccion" rows="2" placeholder="Dirección completa"></textarea>
-        </div>
-
-        <div class="form-group">
-          <label for="carrera">Carrera:</label>
-          <input type="text" id="carrera" placeholder="Ej: Ingeniería en Sistemas">
-        </div>
-
-        <div style="grid-column:1/-1;display:flex;gap:1rem;">
-          <button type="submit" class="btn btn-primary">
-            <span id="btn-crear-text"> Crear Alumno</span>
-            <span id="btn-crear-loader" style="display:none;">Creando...</span>
-          </button>
-          <button type="reset" class="btn btn-secondary"> Limpiar</button>
-        </div>
-      </form>
-    </div>
-
-    <hr>
-
-    <div class="table-section">
-      <h3> Alumnos Registrados</h3>
-      <div style="overflow-x:auto;">
-        <table class="table">
-          <thead>
-            <tr>
-              <th>ID</th>
-              <th>Carnet</th>
-              <th>Nombre Completo</th>
-              <th>Email</th>
-              <th>Teléfono</th>
-              <th>Carrera</th>
-              <th>Usuario</th>
-              <th>Estado</th>
-              <th>Acciones</th>
-            </tr>
-          </thead>
-          <tbody id="alumnosTable">
-            <tr>
-              <td colspan="9" style="text-align:center;">Cargando alumnos...</td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-    </div>
-  </div>
-
-  <div id="editModal" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.5);z-index:1000;justify-content:center;align-items:center;">
-    <div style="background:white;padding:0;border-radius:10px;max-width:600px;width:90%;max-height:90vh;overflow-y:auto;">
-      <div style="display:flex;justify-content:space-between;align-items:center;padding:1.5rem;border-bottom:1px solid #eee;">
-        <h3 style="margin:0;color:#1e3c72;"> Editar Alumno</h3>
-        <span onclick="cerrarModal()" style="font-size:2rem;cursor:pointer;color:#666;line-height:1;">&times;</span>
-      </div>
-      <form id="editForm" style="padding:1.5rem;">
-        <input type="hidden" id="edit_id_alumno">
-        
-        <div class="form-group">
-          <label for="edit_carnet">Carnet:</label>
-          <input type="text" id="edit_carnet" required>
-        </div>
-
-        <div class="form-group">
-          <label for="edit_nombres">Nombres:</label>
-          <input type="text" id="edit_nombres" required>
-        </div>
-
-        <div class="form-group">
-          <label for="edit_apellidos">Apellidos:</label>
-          <input type="text" id="edit_apellidos" required>
-        </div>
-
-        <div class="form-group">
-          <label for="edit_email">Email:</label>
-          <input type="email" id="edit_email" required>
-        </div>
-
-        <div class="form-group">
-          <label for="edit_telefono">Teléfono:</label>
-          <input type="tel" id="edit_telefono">
-        </div>
-
-        <div class="form-group">
-          <label for="edit_fecha_nacimiento">Fecha de Nacimiento:</label>
-          <input type="date" id="edit_fecha_nacimiento">
-        </div>
-
-        <div class="form-group">
-          <label for="edit_direccion">Dirección:</label>
-          <textarea id="edit_direccion" rows="2"></textarea>
-        </div>
-
-        <div class="form-group">
-          <label for="edit_carrera">Carrera:</label>
-          <input type="text" id="edit_carrera" placeholder="Ej: Ingeniería en Sistemas">
-        </div>
-
-        <div class="form-group">
-          <label for="edit_estado">Estado:</label>
-          <select id="edit_estado">
-            <option value="ACTIVO">Activo</option>
-            <option value="INACTIVO">Inactivo</option>
-          </select>
-        </div>
-
-        <div style="border-top:1px solid #eee;padding-top:1rem;display:flex;gap:1rem;justify-content:flex-end;">
-          <button type="button" class="btn btn-secondary" onclick="cerrarModal()">Cancelar</button>
-          <button type="submit" class="btn btn-primary">Guardar Cambios</button>
-        </div>
-      </form>
-    </div>
-  </div>
-
-  <script src="/js/admin/alumnos.js?v=2"></script>
-  <style>
-    .notification.success{background:#d4edda;border-left:4px solid #28a745;color:#155724;}
-    .notification.error{background:#f8d7da;border-left:4px solid #dc3545;color:#721c24;}
-    .badge{padding:4px 10px;border-radius:12px;font-size:0.85rem;font-weight:500;}
-    .badge-success{background:#d4edda;color:#155724;}
-    .badge-inactive{background:#f8d7da;color:#721c24;}
-    .btn-small{padding:0.4rem 0.8rem;font-size:0.85rem;margin-right:0.3rem;}
-    .btn-warning{background:#ffc107;color:#000;}
-    .btn-warning:hover{background:#e0a800;}
-  </style>
+    <script src="/js/admin/alumnos.js?v=2"></script>
+    <style>
+        .notification.success{background:#d4edda;border-left:4px solid #28a745;color:#155724;}
+        .notification.error{background:#f8d7da;border-left:4px solid #dc3545;color:#721c24;}
+        .badge{padding:4px 10px;border-radius:12px;font-size:0.85rem;font-weight:500;}
+        .badge-success{background:#d4edda;color:#155724;}
+        .badge-warning{background:#fff3cd;color:#856404;}
+        .badge-danger{background:#f8d7da;color:#721c24;}
+        .btn-small{padding:0.4rem 0.8rem;font-size:0.85rem;margin-right:0.3rem;}
+        .btn-warning{background:#ffc107;color:#000;}
+        .btn-warning:hover{background:#e0a800;}
+    </style>
 </body>
 </html>

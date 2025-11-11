@@ -1,121 +1,107 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mis Calificaciones - TechnoAcademy University</title>
-    <link rel="stylesheet" href="/css/style.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mis Calificaciones - TechnoAcademy</title>
+  <link rel="stylesheet" href="/css/style.css">
 </head>
 <body>
-    <nav class="navbar">
-        <div class="nav-container">
-            <div class="logo">🎓 TechnoAcademy University</div>
-            <div class="nav-links">
-                <a href="/alumno/dashboard">Dashboard</a>
-                <a href="/logout">Cerrar Sesión</a>
-            </div>
-        </div>
-    </nav>
+  <nav class="navbar">
+    <div class="nav-container">
+      <div class="nav-brand">
+        <svg class="logo-icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M22 10v6M2 10l10-5 10 5-10 5z"></path>
+          <path d="M6 12v5c3 3 9 3 12 0v-5"></path>
+        </svg>
+        <h1>TechnoAcademy - Alumno</h1>
+      </div>
+      <ul class="nav-menu">
+        <li><a href="/alumno/dashboard"> Dashboard</a></li>
+        <li><a href="/alumno/mis-materias"> Mis Materias</a></li>
+        <li><a href="/alumno/calificaciones" class="active"> Calificaciones</a></li>
+        <li><a href="/alumno/pagos"> Pagos</a></li>
+        <li><a href="/logout"> Salir</a></li>
+      </ul>
+    </div>
+  </nav>
 
-    <div class="container">
-        <h1>Mis Calificaciones</h1>
-        
-        <div class="resumen-academico">
-            <div class="card">
-                <h3>Promedio General</h3>
-                <div class="valor" id="promedioGeneral">-</div>
-            </div>
-            <div class="card">
-                <h3>Materias Aprobadas</h3>
-                <div class="valor" id="materiasAprobadas">-</div>
-            </div>
-            <div class="card">
-                <h3>Materias Reprobadas</h3>
-                <div class="valor" id="materiasReprobadas">-</div>
-            </div>
-        </div>
-
-        <h2>Calificaciones por Período</h2>
-        
-        <div class="filter-section">
-            <label for="selectPeriodo">Período:</label>
-            <select id="selectPeriodo" onchange="filtrarCalificaciones()">
-                <option value="">Todos los períodos</option>
-            </select>
-        </div>
-
-        <table class="table">
-            <thead>
-                <tr>
-                    <th>Código</th>
-                    <th>Materia</th>
-                    <th>Créditos</th>
-                    <th>Docente</th>
-                    <th>Nota</th>
-                    <th>Estado</th>
-                </tr>
-            </thead>
-            <tbody id="calificacionesTable">
-                <tr>
-                    <td colspan="6" style="text-align: center;">Cargando calificaciones...</td>
-                </tr>
-            </tbody>
-        </table>
+  <div class="container">
+    <div id="notification" style="display:none;padding:1rem;border-radius:5px;margin-bottom:1rem;"></div>
+    
+    <div style="margin-bottom: 2rem;">
+      <h2 style="color: #1e3c72; margin-bottom: 0.5rem;"> Mis Calificaciones</h2>
+      <p style="color: #666;">Consulta tus calificaciones por período</p>
     </div>
 
-    <style>
-        .resumen-academico {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 20px;
-            margin-bottom: 30px;
-        }
+    <!-- Estadísticas -->
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-bottom: 2rem;">
+      <div class="stat-card" style="border-left: 4px solid #1976d2;">
+        <h4 style="color: #1976d2; margin: 0 0 0.5rem 0;">Materias Cursadas</h4>
+        <p style="font-size: 2rem; font-weight: bold; color: #1976d2; margin: 0;" id="statTotal">0</p>
+      </div>
+      
+      <div class="stat-card" style="border-left: 4px solid #28a745;">
+        <h4 style="color: #28a745; margin: 0 0 0.5rem 0;">Aprobadas</h4>
+        <p style="font-size: 2rem; font-weight: bold; color: #28a745; margin: 0;" id="statAprobadas">0</p>
+      </div>
+      
+      <div class="stat-card" style="border-left: 4px solid #dc3545;">
+        <h4 style="color: #dc3545; margin: 0 0 0.5rem 0;">Reprobadas</h4>
+        <p style="font-size: 2rem; font-weight: bold; color: #dc3545; margin: 0;" id="statReprobadas">0</p>
+      </div>
+      
+      <div class="stat-card" style="border-left: 4px solid #7b1fa2;">
+        <h4 style="color: #7b1fa2; margin: 0 0 0.5rem 0;">Promedio General</h4>
+        <p style="font-size: 2rem; font-weight: bold; color: #7b1fa2; margin: 0;" id="statPromedio">-</p>
+      </div>
+    </div>
 
-        .resumen-academico .card {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            padding: 20px;
-            border-radius: 8px;
-            text-align: center;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-        }
+    <!-- Tabla de Calificaciones -->
+    <div class="table-section">
+      <div style="overflow-x: auto;">
+        <table class="table">
+          <thead>
+            <tr>
+              <th>Código</th>
+              <th>Materia</th>
+              <th>Periodo 1</th>
+              <th>Periodo 2</th>
+              <th>Periodo 3</th>
+              <th>Periodo 4</th>
+              <th>Nota Final</th>
+              <th>Estado</th>
+            </tr>
+          </thead>
+          <tbody id="calificacionesTable">
+            <tr>
+              <td colspan="8" style="text-align:center;">Cargando calificaciones...</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
 
-        .resumen-academico .card h3 {
-            margin: 0 0 10px 0;
-            font-size: 14px;
-            opacity: 0.9;
-        }
+    <div style="margin-top: 3rem; padding: 1.5rem; background: #f8f9fa; border-radius: 8px; border-left: 4px solid #1976d2;">
+      <h3 style="color: #1976d2; margin-bottom: 1rem;"> Escala de Calificaciones</h3>
+      <ul style="color: #666; line-height: 1.8;">
+        <li><strong>Aprobado:</strong> Nota final  6.0</li>
+        <li><strong>Reprobado:</strong> Nota final < 6.0</li>
+        <li><strong>Sin Calificar:</strong> Aún no se ha ingresado la nota final</li>
+        <li>La nota final se calcula como el promedio de los 4 períodos</li>
+      </ul>
+    </div>
+  </div>
 
-        .resumen-academico .valor {
-            font-size: 36px;
-            font-weight: bold;
-        }
-
-        .filter-section {
-            background: white;
-            padding: 15px;
-            margin-bottom: 20px;
-            border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        }
-
-        .filter-section select {
-            padding: 8px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-            font-size: 14px;
-            margin-left: 10px;
-        }
-
-        .table tbody tr {
-            transition: background-color 0.2s;
-        }
-
-        .table tbody tr:hover {
-            background-color: #f5f5f5;
-        }
-    </style>
-
-    <script src="/js/alumno/calificaciones.js"></script>
+  <script src="/js/alumno/calificaciones.js?v=3"></script>
+  <style>
+    .notification.success{background:#d4edda;border-left:4px solid #28a745;color:#155724;}
+    .notification.error{background:#f8d7da;border-left:4px solid #dc3545;color:#721c24;}
+    .badge{padding:4px 10px;border-radius:12px;font-size:0.85rem;font-weight:500;}
+    .badge-success{background:#d4edda;color:#155724;}
+    .badge-danger{background:#f8d7da;color:#721c24;}
+    .badge-secondary{background:#e9ecef;color:#495057;}
+    .stat-card{background:white;padding:1.5rem;border-radius:8px;box-shadow:0 2px 4px rgba(0,0,0,0.1);}
+  </style>
 </body>
 </html>

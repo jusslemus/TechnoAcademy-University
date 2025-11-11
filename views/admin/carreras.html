@@ -1,73 +1,157 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gestionar Carreras - TechnoAcademy University</title>
-    <link rel="stylesheet" href="/css/style.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Gestionar Carreras - Admin</title>
+  <link rel="stylesheet" href="/css/style.css">
 </head>
 <body>
-    <nav class="navbar">
-        <div class="nav-container">
-            <div class="logo">🎓 TechnoAcademy University</div>
-            <div class="nav-links">
-                <a href="/admin/dashboard">Dashboard</a>
-                <a href="/logout">Cerrar Sesión</a>
-            </div>
-        </div>
-    </nav>
+  <nav class="navbar">
+    <div class="nav-container">
+      <div class="nav-brand"><svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 10v6M2 10l10-5 10 5-10 5z"></path><path d="M6 12v5c3 3 9 3 12 0v-5"></path></svg><h1>TechnoAcademy</h1></div>
+      <ul class="nav-menu">
+        <li><a href="/admin/dashboard">Dashboard</a></li>
+        <li><a href="/admin/alumnos">Alumnos</a></li>
+        <li><a href="/admin/docentes">Docentes</a></li>
+        <li><a href="/admin/carreras" class="active">Carreras</a></li>
+        <li><a href="/admin/materias">Materias</a></li>
+        <li><a href="/admin/periodos">Períodos</a></li>
+        <li><a href="/logout">Cerrar Sesión</a></li>
+      </ul>
+    </div>
+  </nav>
 
-    <div class="container">
-        <h1>Gestionar Carreras</h1>
-        
-        <div class="action-buttons">
-            <button class="btn btn-primary" onclick="abrirFormularioNuevaCarrera()">+ Nueva Carrera</button>
-        </div>
+  <div class="container">
+    <div id="notification" style="display:none;padding:1rem;border-radius:5px;margin-bottom:1rem;"></div>
 
-        <div id="formularioContainer" class="form-container" style="display: none;">
-            <h2>Nueva Carrera</h2>
-            <form id="formCarrera" onsubmit="guardarCarrera(event)">
-                <div class="form-group">
-                    <label for="nombre_carrera">Nombre de Carrera:</label>
-                    <input type="text" id="nombre_carrera" name="nombre_carrera" required>
-                </div>
-                <div class="form-group">
-                    <label for="codigo_carrera">Código:</label>
-                    <input type="text" id="codigo_carrera" name="codigo_carrera" required>
-                </div>
-                <div class="form-group">
-                    <label for="duracion_semestres">Duración (semestres):</label>
-                    <input type="number" id="duracion_semestres" name="duracion_semestres" min="1" required>
-                </div>
-                <div class="form-group">
-                    <label for="descripcion">Descripción:</label>
-                    <textarea id="descripcion" name="descripcion" rows="4"></textarea>
-                </div>
-                <div class="form-buttons">
-                    <button type="submit" class="btn btn-success">Guardar</button>
-                    <button type="button" class="btn btn-secondary" onclick="cerrarFormulario()">Cancelar</button>
-                </div>
-            </form>
-        </div>
+    <h2>📚 Gestionar Carreras</h2>
 
-        <table class="table">
-            <thead>
-                <tr>
-                    <th>Código</th>
-                    <th>Nombre</th>
-                    <th>Duración</th>
-                    <th>Estado</th>
-                    <th>Acciones</th>
-                </tr>
-            </thead>
-            <tbody id="carrerasTable">
-                <tr>
-                    <td colspan="5" style="text-align: center;">Cargando...</td>
-                </tr>
-            </tbody>
-        </table>
+    <div style="margin-bottom:2rem;">
+      <input type="text" id="searchInput" placeholder="🔍 Buscar por nombre o código..." 
+             style="width:100%;max-width:400px;padding:0.75rem;border:1px solid #c8d0d8;border-radius:5px;font-size:1rem;">
     </div>
 
-    <script src="/js/admin/carreras.js"></script>
+    <div class="form-section">
+      <h3>➕ Crear Nueva Carrera</h3>
+      <form id="carreraForm">
+        <div class="form-group">
+          <label for="nombre_carrera">Nombre de la Carrera: *</label>
+          <input type="text" id="nombre_carrera" required placeholder="Ej: Ingeniería en Sistemas">
+        </div>
+
+        <div class="form-group">
+          <label for="codigo_carrera">Código: *</label>
+          <input type="text" id="codigo_carrera" required placeholder="Ej: ING-SIS" maxlength="20">
+          <small>Código único de identificación</small>
+        </div>
+
+        <div class="form-group">
+          <label for="duracion_semestres">Duración (semestres): *</label>
+          <input type="number" id="duracion_semestres" required placeholder="Ej: 10" min="1" max="20">
+        </div>
+
+        <div class="form-group" style="grid-column:1/-1;">
+          <label for="descripcion">Descripción:</label>
+          <textarea id="descripcion" rows="3" placeholder="Descripción detallada de la carrera..."></textarea>
+        </div>
+
+        <div style="grid-column:1/-1;display:flex;gap:1rem;">
+          <button type="submit" class="btn btn-primary">
+            <span id="btn-crear-text">✅ Crear Carrera</span>
+            <span id="btn-crear-loader" style="display:none;">Creando...</span>
+          </button>
+          <button type="reset" class="btn btn-secondary">🔄 Limpiar</button>
+        </div>
+      </form>
+    </div>
+
+    <hr>
+
+    <div class="table-section">
+      <h3>📋 Carreras Registradas</h3>
+      <div style="overflow-x:auto;">
+        <table class="table">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Código</th>
+              <th>Nombre de la Carrera</th>
+              <th>Duración</th>
+              <th>Descripción</th>
+              <th>Estado</th>
+              <th>Acciones</th>
+            </tr>
+          </thead>
+          <tbody id="carrerasTable">
+            <tr>
+              <td colspan="7" style="text-align:center;">Cargando carreras...</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal de Edición -->
+  <div id="editModal" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.5);z-index:1000;justify-content:center;align-items:center;">
+    <div style="background:white;padding:0;border-radius:10px;max-width:600px;width:90%;max-height:90vh;overflow-y:auto;">
+      <div style="display:flex;justify-content:space-between;align-items:center;padding:1.5rem;border-bottom:1px solid #eee;">
+        <h3 style="margin:0;color:#1e3c72;">✏️ Editar Carrera</h3>
+        <span onclick="cerrarModal()" style="font-size:2rem;cursor:pointer;color:#666;line-height:1;">&times;</span>
+      </div>
+      <form id="editForm" style="padding:1.5rem;">
+        <input type="hidden" id="edit_id_carrera">
+        
+        <div class="form-group">
+          <label for="edit_nombre_carrera">Nombre de la Carrera:</label>
+          <input type="text" id="edit_nombre_carrera" required>
+        </div>
+
+        <div class="form-group">
+          <label for="edit_codigo_carrera">Código:</label>
+          <input type="text" id="edit_codigo_carrera" required maxlength="20">
+        </div>
+
+        <div class="form-group">
+          <label for="edit_duracion_semestres">Duración (semestres):</label>
+          <input type="number" id="edit_duracion_semestres" required min="1" max="20">
+        </div>
+
+        <div class="form-group">
+          <label for="edit_descripcion">Descripción:</label>
+          <textarea id="edit_descripcion" rows="3"></textarea>
+        </div>
+
+        <div class="form-group">
+          <label for="edit_estado">Estado:</label>
+          <select id="edit_estado">
+            <option value="ACTIVA">Activa</option>
+            <option value="INACTIVA">Inactiva</option>
+          </select>
+        </div>
+
+        <div style="border-top:1px solid #eee;padding-top:1rem;display:flex;gap:1rem;justify-content:flex-end;">
+          <button type="button" class="btn btn-secondary" onclick="cerrarModal()">Cancelar</button>
+          <button type="submit" class="btn btn-primary">💾 Guardar Cambios</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script src="/js/admin/carreras.js?v=3"></script>
+  <style>
+    .notification.success{background:#d4edda;border-left:4px solid #28a745;color:#155724;}
+    .notification.error{background:#f8d7da;border-left:4px solid #dc3545;color:#721c24;}
+    .badge{padding:4px 10px;border-radius:12px;font-size:0.85rem;font-weight:500;}
+    .badge-success{background:#d4edda;color:#155724;}
+    .badge-inactive{background:#f8d7da;color:#721c24;}
+    .btn-small{padding:0.4rem 0.8rem;font-size:0.85rem;margin-right:0.3rem;}
+    .btn-warning{background:#ffc107;color:#000;}
+    .btn-warning:hover{background:#e0a800;}
+    table td:nth-child(5){max-width:250px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  </style>
 </body>
 </html>
+
+

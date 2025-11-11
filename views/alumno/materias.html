@@ -1,119 +1,148 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mis Materias - TechnoAcademy University</title>
-    <link rel="stylesheet" href="/css/style.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mis Materias - TechnoAcademy</title>
+  <link rel="stylesheet" href="/css/style.css">
 </head>
 <body>
-    <nav class="navbar">
-        <div class="nav-container">
-            <div class="logo">🎓 TechnoAcademy University</div>
-            <div class="nav-links">
-                <a href="/alumno/dashboard">Dashboard</a>
-                <a href="/logout">Cerrar Sesión</a>
-            </div>
-        </div>
-    </nav>
+  <nav class="navbar">
+    <div class="nav-container">
+      <div class="nav-brand">
+        <svg class="logo-icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M22 10v6M2 10l10-5 10 5-10 5z"></path>
+          <path d="M6 12v5c3 3 9 3 12 0v-5"></path>
+        </svg>
+        <h1>TechnoAcademy - Alumno</h1>
+      </div>
+      <ul class="nav-menu">
+        <li><a href="/alumno/dashboard"> Dashboard</a></li>
+        <li><a href="/alumno/mis-materias" class="active"> Mis Materias</a></li>
+        <li><a href="/alumno/calificaciones"> Calificaciones</a></li>
+        <li><a href="/alumno/pagos"> Pagos</a></li>
+        <li><a href="/logout"> Salir</a></li>
+      </ul>
+    </div>
+  </nav>
 
-    <div class="container">
-        <h1>Disponibilidad de Materias</h1>
-        
-        <div class="filter-section">
-            <label for="selectPeriodo">Período Académico:</label>
-            <select id="selectPeriodo" onchange="cargarMaterias()">
-                <option value="">Seleccionar período...</option>
-            </select>
-        </div>
-
-        <div class="materias-grid">
-            <div class="materia-card" id="materiasContainer">
-                <p style="text-align: center;">Cargando materias disponibles...</p>
-            </div>
-        </div>
+  <div class="container">
+    <div id="notification" style="display:none;padding:1rem;border-radius:5px;margin-bottom:1rem;"></div>
+    
+    <div style="margin-bottom: 2rem;">
+      <h2 style="color: #1e3c72; margin-bottom: 0.5rem;"> Mis Materias Inscritas</h2>
+      <p style="color: #666;">Listado de todas tus materias del período actual</p>
     </div>
 
-    <style>
-        .filter-section {
-            background: white;
-            padding: 15px;
-            margin-bottom: 20px;
-            border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        }
+    <div class="table-section">
+      <div style="overflow-x: auto;">
+        <table class="table">
+          <thead>
+            <tr>
+              <th>Código</th>
+              <th>Materia</th>
+              <th>Grupo</th>
+              <th>Créditos</th>
+              <th>Docente</th>
+              <th>Horario</th>
+              <th>Aula</th>
+              <th>Estado</th>
+            </tr>
+          </thead>
+          <tbody id="materiasTable">
+            <tr>
+              <td colspan="8" style="text-align:center;">Cargando materias...</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
 
-        .filter-section select {
-            padding: 8px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-            font-size: 14px;
-            margin-left: 10px;
-        }
+    <div style="margin-top: 3rem; padding: 1.5rem; background: #f8f9fa; border-radius: 8px; border-left: 4px solid #1976d2;">
+      <h3 style="color: #1976d2; margin-bottom: 1rem;"> Información</h3>
+      <ul style="color: #666; line-height: 1.8;">
+        <li>Aquí puedes ver todas tus materias activas del período actual</li>
+        <li>Para inscribirte en nuevas materias, ve a la sección <strong>Inscripciones</strong></li>
+        <li>Verifica tus horarios y aulas para no tener conflictos</li>
+        <li>Las calificaciones estarán disponibles en la sección <strong>Calificaciones</strong></li>
+      </ul>
+    </div>
+  </div>
 
-        .materias-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-            gap: 20px;
-        }
+  <script>
+    let misMaterias = [];
 
-        .materia-card {
-            background: white;
-            border-left: 4px solid #667eea;
-            padding: 15px;
-            border-radius: 8px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-        }
+    document.addEventListener("DOMContentLoaded", function() {
+      cargarMisMaterias();
+    });
 
-        .materia-card h3 {
-            margin-top: 0;
-            color: #667eea;
+    async function cargarMisMaterias() {
+      try {
+        const response = await fetch("/alumno/api/mis-materias");
+        const data = await response.json();
+        
+        if (data.success && data.materias) {
+          misMaterias = data.materias;
+          mostrarMaterias(misMaterias);
+        } else {
+          mostrarError("No se pudieron cargar las materias");
         }
+      } catch (error) {
+        console.error("Error cargando materias:", error);
+        mostrarError("Error al cargar las materias");
+      }
+    }
 
-        .materia-info {
-            font-size: 14px;
-            color: #666;
-            margin: 10px 0;
-        }
+    function mostrarMaterias(materias) {
+      const tbody = document.getElementById("materiasTable");
+      
+      if (materias.length === 0) {
+        tbody.innerHTML = `
+          <tr>
+            <td colspan="8" style="text-align: center; padding: 2rem; color: #999;">
+               No tienes materias inscritas en este momento
+            </td>
+          </tr>
+        `;
+        return;
+      }
+      
+      tbody.innerHTML = materias.map(mat => {
+        const estadoBadge = mat.ESTADO_INSCRIPCION === "INSCRITO" ? "badge-success" : "badge-secondary";
+        
+        return `
+          <tr>
+            <td><strong>${mat.CODIGO_MATERIA || "-"}</strong></td>
+            <td>${mat.NOMBRE_MATERIA}</td>
+            <td>${mat.NUMERO_GRUPO}</td>
+            <td style="text-align: center;">${mat.CREDITOS || "-"}</td>
+            <td><small>${mat.NOMBRE_DOCENTE || "Sin asignar"}</small></td>
+            <td><small>${mat.HORARIO || "Por definir"}</small></td>
+            <td>${mat.AULA || "-"}</td>
+            <td><span class="badge ${estadoBadge}">${mat.ESTADO_INSCRIPCION}</span></td>
+          </tr>
+        `;
+      }).join("");
+    }
 
-        .materia-info strong {
-            color: #333;
-        }
+    function mostrarError(mensaje) {
+      const tbody = document.getElementById("materiasTable");
+      tbody.innerHTML = `
+        <tr>
+          <td colspan="8" style="text-align: center; padding: 2rem; color: #dc3545;">
+             ${mensaje}
+          </td>
+        </tr>
+      `;
+    }
+  </script>
 
-        .materia-actions {
-            display: flex;
-            gap: 10px;
-            margin-top: 15px;
-        }
-
-        .materia-actions button {
-            flex: 1;
-        }
-
-        .cupo-info {
-            background: #f0f0f0;
-            padding: 10px;
-            border-radius: 4px;
-            margin: 10px 0;
-            font-size: 13px;
-        }
-    </style>
-
-    <script>
-        function cargarMaterias() {
-            console.log('Cargar materias - Implementar API');
-        }
-
-        function inscribirse(id_grupo) {
-            if (confirm('¿Deseas inscribirse en este grupo?')) {
-                console.log('Inscribirse en grupo:', id_grupo);
-            }
-        }
-
-        // Cargar períodos al iniciar
-        document.addEventListener('DOMContentLoaded', function() {
-            console.log('Cargar períodos académicos');
-        });
-    </script>
+  <style>
+    .notification.success{background:#d4edda;border-left:4px solid #28a745;color:#155724;}
+    .notification.error{background:#f8d7da;border-left:4px solid #dc3545;color:#721c24;}
+    .badge{padding:4px 10px;border-radius:12px;font-size:0.85rem;font-weight:500;}
+    .badge-success{background:#d4edda;color:#155724;}
+    .badge-secondary{background:#e9ecef;color:#495057;}
+  </style>
 </body>
 </html>

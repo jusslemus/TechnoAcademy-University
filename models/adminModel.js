@@ -115,10 +115,11 @@ async function getAlumnos() {
   try {
     const alumnos = await db.fetchQuery(
       `SELECT a.id_alumno, a.carnet, a.nombres, a.apellidos, a.email, a.telefono,
-              a.fecha_nacimiento, a.direccion, a.carrera, a.estado_academico as estado, 
-              a.fecha_ingreso, a.id_usuario, u.nombre_usuario
+              a.fecha_nacimiento, a.direccion, a.id_carrera, c.nombre_carrera, 
+              a.estado_academico as estado, a.fecha_ingreso, a.id_usuario, u.nombre_usuario
        FROM alumnos a
        LEFT JOIN usuarios u ON a.id_usuario = u.id_usuario
+       LEFT JOIN carreras c ON a.id_carrera = c.id_carrera
        ORDER BY a.carnet`
     );
     return alumnos;
@@ -155,9 +156,9 @@ async function crearAlumno(datos) {
     // 2. Crear alumno
     await connection.execute(
       `INSERT INTO alumnos (id_usuario, carnet, nombres, apellidos, email, telefono, 
-                           fecha_nacimiento, direccion, carrera)
+                           fecha_nacimiento, direccion, id_carrera)
        VALUES (:id_usuario, :carnet, :nombres, :apellidos, :email, :telefono, 
-               :fecha_nacimiento, :direccion, :carrera)`,
+               :fecha_nacimiento, :direccion, :id_carrera)`,
       {
         id_usuario: id_usuario,
         carnet: datos.carnet,
@@ -167,7 +168,7 @@ async function crearAlumno(datos) {
         telefono: datos.telefono || null,
         fecha_nacimiento: datos.fecha_nacimiento ? new Date(datos.fecha_nacimiento) : null,
         direccion: datos.direccion || null,
-        carrera: datos.carrera || null
+        id_carrera: datos.id_carrera || null
       },
       { autoCommit: false }
     );
@@ -230,9 +231,9 @@ async function editarAlumno(id_alumno, datos) {
       campos.push('direccion = :direccion');
       params.direccion = datos.direccion || null;
     }
-    if (datos.carrera !== undefined) {
-      campos.push('carrera = :carrera');
-      params.carrera = datos.carrera || null;
+    if (datos.id_carrera !== undefined) {
+      campos.push('id_carrera = :id_carrera');
+      params.id_carrera = datos.id_carrera || null;
     }
     if (datos.estado) {
       campos.push('estado_academico = :estado');
@@ -361,9 +362,17 @@ async function editarCarrera(id_carrera, datos) {
       updates.push(`codigo_carrera = :codigo_carrera`);
       params.codigo_carrera = datos.codigo_carrera;
     }
+    if (datos.duracion_semestres !== undefined) {
+      updates.push(`duracion_ciclos = :duracion_ciclos`);
+      params.duracion_ciclos = datos.duracion_semestres;
+    }
     if (datos.descripcion !== undefined) {
       updates.push(`descripcion = :descripcion`);
       params.descripcion = datos.descripcion;
+    }
+    if (datos.estado) {
+      updates.push(`estado = :estado`);
+      params.estado = datos.estado;
     }
 
     if (updates.length === 0) throw new Error('No hay campos para actualizar');
@@ -400,9 +409,17 @@ async function getMaterias() {
   try {
     const materias = await db.fetchQuery(
       `SELECT m.id_materia, m.codigo_materia, m.nombre_materia, m.creditos, m.horas_semanales,
-              c.nombre_carrera, m.ciclo_recomendado, m.estado
+              c.nombre_carrera, c.id_carrera, m.ciclo_recomendado, m.estado, m.descripcion,
+              g.id_docente,
+              d.nombres || ' ' || d.apellidos as nombre_docente
        FROM materias m
        LEFT JOIN carreras c ON m.id_carrera = c.id_carrera
+       LEFT JOIN (
+         SELECT id_materia, id_docente, id_grupo,
+                ROW_NUMBER() OVER (PARTITION BY id_materia ORDER BY id_grupo DESC) as rn
+         FROM grupos
+       ) g ON m.id_materia = g.id_materia AND g.rn = 1
+       LEFT JOIN docentes d ON g.id_docente = d.id_docente
        ORDER BY m.codigo_materia`
     );
     return materias;
@@ -415,11 +432,12 @@ async function getMaterias() {
 // Crear materia
 async function crearMateria(datos) {
   try {
+    // Insertar la materia
     await db.executeQuery(
       `INSERT INTO materias (codigo_materia, nombre_materia, descripcion, creditos, 
-                            horas_semanales, id_carrera, ciclo_recomendado)
+                            horas_semanales, id_carrera, ciclo_recomendado, estado)
        VALUES (:codigo_materia, :nombre_materia, :descripcion, :creditos, 
-               :horas_semanales, :id_carrera, :ciclo_recomendado)`,
+               :horas_semanales, :id_carrera, :ciclo_recomendado, 'ACTIVA')`,
       {
         codigo_materia: datos.codigo_materia,
         nombre_materia: datos.nombre_materia,
@@ -430,7 +448,56 @@ async function crearMateria(datos) {
         ciclo_recomendado: datos.ciclo_recomendado || 1
       }
     );
+    
     console.log(`✅ Materia creada: ${datos.codigo_materia}`);
+    
+    // Insertar el docente en la tabla grupos si fue proporcionado
+    if (datos.id_docente) {
+      const materiaResult = await db.fetchQuery(
+        `SELECT id_materia FROM materias WHERE codigo_materia = :codigo_materia`,
+        { codigo_materia: datos.codigo_materia }
+      );
+      
+      if (materiaResult.length > 0) {
+        const id_materia = materiaResult[0].ID_MATERIA;
+        
+        // Obtener un período activo o el más reciente
+        const periodoResult = await db.fetchQuery(
+          `SELECT id_periodo FROM periodos_academicos 
+           WHERE estado = 'ACTIVO' AND ROWNUM = 1
+           ORDER BY fecha_inicio DESC`
+        );
+        
+        let id_periodo = null;
+        if (periodoResult.length > 0) {
+          id_periodo = periodoResult[0].ID_PERIODO;
+        } else {
+          // Si no hay período activo, obtener cualquier período
+          const anyPeriodo = await db.fetchQuery(
+            `SELECT id_periodo FROM periodos_academicos WHERE ROWNUM = 1 ORDER BY fecha_inicio DESC`
+          );
+          if (anyPeriodo.length > 0) {
+            id_periodo = anyPeriodo[0].ID_PERIODO;
+          }
+        }
+        
+        if (id_periodo) {
+          await db.executeQuery(
+            `INSERT INTO grupos (id_materia, id_docente, id_periodo, numero_grupo, cupo_maximo, cupo_actual, estado)
+             VALUES (:id_materia, :id_docente, :id_periodo, 1, 30, 0, 'ABIERTO')`,
+            {
+              id_materia: id_materia,
+              id_docente: datos.id_docente,
+              id_periodo: id_periodo
+            }
+          );
+          console.log(`✅ Docente asignado a la materia (período: ${id_periodo})`);
+        } else {
+          console.log(`⚠️ No hay períodos disponibles. Docente no asignado.`);
+        }
+      }
+    }
+    
     return { success: true, message: 'Materia creada exitosamente' };
   } catch (err) {
     console.error('Error creando materia:', err);
@@ -457,16 +524,85 @@ async function editarMateria(id_materia, datos) {
       updates.push(`creditos = :creditos`);
       params.creditos = datos.creditos;
     }
-    if (datos.horas_semanales) {
+    if (datos.horas_semanales !== undefined) {
       updates.push(`horas_semanales = :horas_semanales`);
       params.horas_semanales = datos.horas_semanales;
     }
+    if (datos.ciclo_recomendado !== undefined) {
+      updates.push(`ciclo_recomendado = :ciclo_recomendado`);
+      params.ciclo_recomendado = datos.ciclo_recomendado;
+    }
+    if (datos.id_carrera) {
+      updates.push(`id_carrera = :id_carrera`);
+      params.id_carrera = datos.id_carrera;
+    }
+    if (datos.descripcion !== undefined) {
+      updates.push(`descripcion = :descripcion`);
+      params.descripcion = datos.descripcion;
+    }
+    if (datos.estado) {
+      updates.push(`estado = :estado`);
+      params.estado = datos.estado;
+    }
 
-    if (updates.length === 0) throw new Error('No hay campos para actualizar');
+    if (updates.length === 0 && !datos.id_docente) throw new Error('No hay campos para actualizar');
 
-    query += updates.join(', ') + ` WHERE id_materia = :id_materia`;
-    await db.executeQuery(query, params);
-    console.log(`✅ Materia editada: ${id_materia}`);
+    if (updates.length > 0) {
+      query += updates.join(', ') + ` WHERE id_materia = :id_materia`;
+      await db.executeQuery(query, params);
+      console.log(`✅ Materia editada: ${id_materia}`);
+    }
+    
+    // Manejar cambio de docente
+    if (datos.id_docente !== undefined) {
+      // Verificar si existe un grupo para esta materia
+      const grupos = await db.fetchQuery(
+        `SELECT id_grupo FROM grupos WHERE id_materia = :id_materia AND ROWNUM = 1`,
+        { id_materia }
+      );
+      
+      if (grupos.length > 0) {
+        // Actualizar el docente del grupo existente
+        await db.executeQuery(
+          `UPDATE grupos SET id_docente = :id_docente WHERE id_grupo = :id_grupo`,
+          { id_docente: datos.id_docente || null, id_grupo: grupos[0].ID_GRUPO }
+        );
+        console.log(`✅ Docente actualizado en grupo existente`);
+      } else if (datos.id_docente) {
+        // Crear un grupo nuevo con el docente
+        // Obtener un período activo o el más reciente
+        const periodoResult = await db.fetchQuery(
+          `SELECT id_periodo FROM periodos_academicos 
+           WHERE estado = 'ACTIVO' AND ROWNUM = 1
+           ORDER BY fecha_inicio DESC`
+        );
+        
+        let id_periodo = null;
+        if (periodoResult.length > 0) {
+          id_periodo = periodoResult[0].ID_PERIODO;
+        } else {
+          // Si no hay período activo, obtener cualquier período
+          const anyPeriodo = await db.fetchQuery(
+            `SELECT id_periodo FROM periodos_academicos WHERE ROWNUM = 1 ORDER BY fecha_inicio DESC`
+          );
+          if (anyPeriodo.length > 0) {
+            id_periodo = anyPeriodo[0].ID_PERIODO;
+          }
+        }
+        
+        if (id_periodo) {
+          await db.executeQuery(
+            `INSERT INTO grupos (id_materia, id_docente, id_periodo, numero_grupo, cupo_maximo, cupo_actual, estado)
+             VALUES (:id_materia, :id_docente, :id_periodo, 1, 30, 0, 'ABIERTO')`,
+            { id_materia, id_docente: datos.id_docente, id_periodo: id_periodo }
+          );
+          console.log(`✅ Nuevo grupo creado con docente (período: ${id_periodo})`);
+        } else {
+          console.log(`⚠️ No hay períodos disponibles. Docente no asignado.`);
+        }
+      }
+    }
+    
     return { success: true, message: 'Materia editada exitosamente' };
   } catch (err) {
     console.error('Error editando materia:', err);
@@ -508,19 +644,18 @@ async function getPeriodos() {
 // Crear período
 async function crearPeriodo(datos) {
   try {
-    const codigo_periodo = datos.codigo_periodo || datos.nombre_periodo;
-    
     await db.executeQuery(
-      `INSERT INTO periodos_academicos (codigo_periodo, nombre_periodo, fecha_inicio, fecha_fin)
-       VALUES (:codigo_periodo, :nombre_periodo, :fecha_inicio, :fecha_fin)`,
+      `INSERT INTO periodos_academicos (codigo_periodo, nombre_periodo, fecha_inicio, fecha_fin, estado)
+       VALUES (:codigo_periodo, :nombre_periodo, :fecha_inicio, :fecha_fin, :estado)`,
       {
-        codigo_periodo,
+        codigo_periodo: datos.codigo_periodo,
         nombre_periodo: datos.nombre_periodo,
-        fecha_inicio: datos.fecha_inicio,
-        fecha_fin: datos.fecha_fin
+        fecha_inicio: new Date(datos.fecha_inicio),
+        fecha_fin: new Date(datos.fecha_fin),
+        estado: datos.estado
       }
     );
-    console.log(`✅ Período creado: ${codigo_periodo}`);
+    console.log(`✅ Período creado: ${datos.codigo_periodo}`);
     return { success: true, message: 'Período creado exitosamente' };
   } catch (err) {
     console.error('Error creando período:', err);
@@ -535,17 +670,25 @@ async function editarPeriodo(id_periodo, datos) {
     let params = { id_periodo };
     let updates = [];
 
+    if (datos.codigo_periodo) {
+      updates.push(`codigo_periodo = :codigo_periodo`);
+      params.codigo_periodo = datos.codigo_periodo;
+    }
     if (datos.nombre_periodo) {
       updates.push(`nombre_periodo = :nombre_periodo`);
       params.nombre_periodo = datos.nombre_periodo;
     }
     if (datos.fecha_inicio) {
       updates.push(`fecha_inicio = :fecha_inicio`);
-      params.fecha_inicio = datos.fecha_inicio;
+      params.fecha_inicio = new Date(datos.fecha_inicio);
     }
     if (datos.fecha_fin) {
       updates.push(`fecha_fin = :fecha_fin`);
-      params.fecha_fin = datos.fecha_fin;
+      params.fecha_fin = new Date(datos.fecha_fin);
+    }
+    if (datos.estado) {
+      updates.push(`estado = :estado`);
+      params.estado = datos.estado;
     }
 
     if (updates.length === 0) throw new Error('No hay campos para actualizar');
@@ -766,16 +909,51 @@ async function editarDocente(id_docente, datos) {
 
 // Eliminar docente
 async function eliminarDocente(id_docente) {
+  let connection;
   try {
-    await db.executeQuery(
+    connection = await db.getConnection();
+    
+    // Obtener el id_usuario del docente
+    const docente = await db.fetchOne(
+      `SELECT id_usuario FROM docentes WHERE id_docente = :id_docente`,
+      { id_docente }
+    );
+    
+    if (!docente || !docente.ID_USUARIO) {
+      throw new Error('Docente no encontrado o sin usuario asociado');
+    }
+    
+    // PASO 1: Eliminar grupos asociados al docente
+    await connection.execute(
+      `DELETE FROM grupos WHERE id_docente = :id_docente`,
+      { id_docente }
+    );
+    
+    // PASO 2: Eliminar el docente
+    await connection.execute(
       `DELETE FROM docentes WHERE id_docente = :id_docente`,
       { id_docente }
     );
-    console.log(`✅ Docente eliminado: ${id_docente}`);
+    
+    // PASO 3: Eliminar el usuario asociado
+    await connection.execute(
+      `DELETE FROM usuarios WHERE id_usuario = :id_usuario`,
+      { id_usuario: docente.ID_USUARIO }
+    );
+    
+    await connection.commit();
+    console.log(`✅ Docente eliminado: ${id_docente} (usuario: ${docente.ID_USUARIO})`);
     return { success: true, message: 'Docente eliminado exitosamente' };
   } catch (err) {
+    if (connection) {
+      await connection.rollback();
+    }
     console.error('Error eliminando docente:', err);
     throw err;
+  } finally {
+    if (connection) {
+      await connection.close();
+    }
   }
 }
 

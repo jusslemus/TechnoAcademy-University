@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="es">
 <head>
   <meta charset="UTF-8">
@@ -9,7 +9,13 @@
 <body>
   <nav class="navbar">
     <div class="nav-container">
-      <h1>🎓 TechnoAcademy - Admin</h1>
+      <div class="nav-brand">
+        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M22 10v6M2 10l10-5 10 5-10 5z"></path>
+          <path d="M6 12v5c3 3 9 3 12 0v-5"></path>
+        </svg>
+        <h1>TechnoAcademy</h1>
+      </div>
       <ul class="nav-menu">
         <li><a href="/admin/dashboard" class="active">Dashboard</a></li>
         <li><a href="/admin/alumnos">Alumnos</a></li>
@@ -17,56 +23,154 @@
         <li><a href="/admin/carreras">Carreras</a></li>
         <li><a href="/admin/materias">Materias</a></li>
         <li><a href="/admin/periodos">Períodos</a></li>
-        <li><a href="/logout">Cerrar Sesión</a></li>
+        <li><a href="/logout" class="btn-logout">Cerrar Sesión</a></li>
       </ul>
     </div>
   </nav>
 
   <div class="container">
     <div class="admin-header">
-      <h2>👨‍💼 Panel de Administración</h2>
+      <h2>Panel de Administración</h2>
       <p>Bienvenido Admin, gestiona todos los módulos del sistema</p>
     </div>
 
+    <div class="stats-grid">
+      <div class="stat-card stat-primary">
+        <div class="stat-icon">
+          <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+            <circle cx="12" cy="7" r="4"></circle>
+          </svg>
+        </div>
+        <div class="stat-content">
+          <h3 id="total-alumnos">-</h3>
+          <p>Alumnos Registrados</p>
+        </div>
+      </div>
+
+      <div class="stat-card stat-success">
+        <div class="stat-icon">
+          <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+            <circle cx="9" cy="7" r="4"></circle>
+            <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+            <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+          </svg>
+        </div>
+        <div class="stat-content">
+          <h3 id="total-docentes">-</h3>
+          <p>Docentes Activos</p>
+        </div>
+      </div>
+
+      <div class="stat-card stat-warning">
+        <div class="stat-icon">
+          <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
+            <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>
+          </svg>
+        </div>
+        <div class="stat-content">
+          <h3 id="total-materias">-</h3>
+          <p>Materias Disponibles</p>
+        </div>
+      </div>
+
+      <div class="stat-card stat-info">
+        <div class="stat-icon">
+          <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M22 10v6M2 10l10-5 10 5-10 5z"></path>
+            <path d="M6 12v5c3 3 9 3 12 0v-5"></path>
+          </svg>
+        </div>
+        <div class="stat-content">
+          <h3 id="total-carreras">-</h3>
+          <p>Carreras Ofrecidas</p>
+        </div>
+      </div>
+    </div>
+
+    <h3 style="margin: 2rem 0 1rem; color: #1e3c72;">Accesos Rápidos</h3>
     <div class="admin-dashboard">
       <div class="card">
-        <h3>�‍🎓 Gestionar Alumnos</h3>
+        <div class="card-icon">
+          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+            <circle cx="12" cy="7" r="4"></circle>
+          </svg>
+        </div>
+        <h3>Gestionar Alumnos</h3>
         <p>Crear, editar y ver información de estudiantes</p>
         <a href="/admin/alumnos" class="btn btn-primary">Ir a Alumnos</a>
       </div>
 
       <div class="card">
-        <h3>👨‍� Gestionar Docentes</h3>
+        <div class="card-icon">
+          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+            <circle cx="9" cy="7" r="4"></circle>
+            <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+            <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+          </svg>
+        </div>
+        <h3>Gestionar Docentes</h3>
         <p>Administrar profesores y sus especialidades</p>
         <a href="/admin/docentes" class="btn btn-primary">Ir a Docentes</a>
       </div>
 
       <div class="card">
-        <h3>🎓 Gestionar Carreras</h3>
+        <div class="card-icon">
+          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M22 10v6M2 10l10-5 10 5-10 5z"></path>
+            <path d="M6 12v5c3 3 9 3 12 0v-5"></path>
+          </svg>
+        </div>
+        <h3>Gestionar Carreras</h3>
         <p>Administrar programas académicos disponibles</p>
         <a href="/admin/carreras" class="btn btn-primary">Ir a Carreras</a>
       </div>
 
       <div class="card">
-        <h3>� Gestionar Materias</h3>
+        <div class="card-icon">
+          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
+            <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>
+          </svg>
+        </div>
+        <h3>Gestionar Materias</h3>
         <p>Crear y editar materias/cursos</p>
         <a href="/admin/materias" class="btn btn-primary">Ir a Materias</a>
       </div>
 
       <div class="card">
-        <h3>� Gestionar Períodos</h3>
-        <p>Crear y abrir/cerrar períodos académicos</p>
+        <div class="card-icon">
+          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+            <line x1="16" y1="2" x2="16" y2="6"></line>
+            <line x1="8" y1="2" x2="8" y2="6"></line>
+            <line x1="3" y1="10" x2="21" y2="10"></line>
+          </svg>
+        </div>
+        <h3>Gestionar Períodos</h3>
+        <p>Crear y administrar períodos académicos</p>
         <a href="/admin/periodos" class="btn btn-primary">Ir a Períodos</a>
       </div>
 
       <div class="card">
-        <h3>� Estadísticas</h3>
-        <p>Ver reportes y métricas del sistema</p>
-        <a href="#" class="btn btn-secondary">Próximamente</a>
+        <div class="card-icon">
+          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
+            <polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline>
+            <line x1="12" y1="22.08" x2="12" y2="12"></line>
+          </svg>
+        </div>
+        <h3>Gestionar Grupos</h3>
+        <p>Administrar grupos y asignaciones</p>
+        <a href="/admin/grupos" class="btn btn-primary">Ir a Grupos</a>
       </div>
     </div>
   </div>
 
-  <script src="/js/dashboard.js"></script>
+  <script src="/js/admin/dashboard.js?v=2"></script>
 </body>
 </html>

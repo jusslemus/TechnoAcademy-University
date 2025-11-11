@@ -9,64 +9,114 @@
 <body>
   <nav class="navbar">
     <div class="nav-container">
-      <h1>🎓 TechnoAcademy - Alumno</h1>
+      <div class="nav-brand">
+        <svg class="logo-icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M22 10v6M2 10l10-5 10 5-10 5z"></path>
+          <path d="M6 12v5c3 3 9 3 12 0v-5"></path>
+        </svg>
+        <h1>TechnoAcademy - Alumno</h1>
+      </div>
       <ul class="nav-menu">
-        <li><a href="/alumno/dashboard">Dashboard</a></li>
-        <li><a href="/alumno/inscripciones">Mis Inscripciones</a></li>
-        <li><a href="/alumno/materias">Materias Disponibles</a></li>
-        <li><a href="/alumno/calificaciones">Mis Calificaciones</a></li>
-        <li><a href="/alumno/pagos">Mis Pagos</a></li>
-        <li><a href="/logout">Cerrar Sesión</a></li>
+        <li><a href="/alumno/dashboard" class="active">📊 Dashboard</a></li>
+        <li><a href="/alumno/mis-materias">📚 Mis Materias</a></li>
+        <li><a href="/alumno/calificaciones">📋 Calificaciones</a></li>
+        <li><a href="/alumno/pagos">💳 Pagos</a></li>
+        <li><a href="/logout">🚪 Salir</a></li>
       </ul>
     </div>
   </nav>
 
   <div class="container">
-    <div class="student-header">
-      <h2>👨‍🎓 Bienvenido Alumno</h2>
-      <p>Panel de control de tu información académica</p>
+    <div style="margin-bottom: 2rem;">
+      <h2 style="color: #1e3c72; margin-bottom: 0.5rem;">Bienvenido Alumno</h2>
+      <p style="color: #666;">Panel de control de tu información académica</p>
     </div>
 
-    <div class="student-info">
-      <div class="card">
-        <h3>ℹ️ Mi Información</h3>
-        <p>Carné: <span id="carnet"></span></p>
-        <p>Carrera: <span id="carrera"></span></p>
-        <p>Estado: <span id="estado"></span></p>
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="card-icon" style="background: #e3f2fd;">
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#1976d2" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+            <circle cx="12" cy="7" r="4"></circle>
+          </svg>
+        </div>
+        <div>
+          <h3>Mi Información</h3>
+          <p style="font-size: 0.9rem; margin: 0.5rem 0; color: #666;">
+            Carné: <strong id="carnet">-</strong><br>
+            Carrera: <strong id="carrera">-</strong><br>
+            Estado: <span id="estado" class="badge badge-success">-</span>
+          </p>
+        </div>
       </div>
 
-      <div class="card">
-        <h3>📚 Mi Inscripción</h3>
-        <p>Materias Inscritas: <span id="materiasInscritas">0</span></p>
-        <p>Créditos Matriculados: <span id="creditosMatriculados">0</span></p>
-        <a href="/alumno/inscripciones" class="btn btn-primary">Ver Detalles</a>
+      <div class="stat-card">
+        <div class="card-icon" style="background: #f3e5f5;">
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#7b1fa2" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
+            <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>
+          </svg>
+        </div>
+        <div>
+          <h3>Mi Inscripción</h3>
+          <p style="font-size: 1.5rem; font-weight: bold; color: #7b1fa2; margin: 0.25rem 0;" id="materiasInscritas">0</p>
+          <p style="font-size: 0.9rem; color: #666;">Materias Inscritas</p>
+          <p style="font-size: 0.85rem; color: #999; margin-top: 0.25rem;">
+            Créditos: <strong id="creditosMatriculados">0</strong>
+          </p>
+        </div>
       </div>
 
-      <div class="card">
-        <h3>📊 Mi Desempeño</h3>
-        <p>Promedio Acumulado: <span id="promedio">-</span></p>
-        <p>Estado Académico: <span id="estadoAcademico">Activo</span></p>
-        <a href="/alumno/calificaciones" class="btn btn-primary">Ver Calificaciones</a>
+      <div class="stat-card">
+        <div class="card-icon" style="background: #fff3e0;">
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#f57c00" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M22 12h-4l-3 9L9 3l-3 9H2"></path>
+          </svg>
+        </div>
+        <div>
+          <h3>Mi Desempeño</h3>
+          <p style="font-size: 1.5rem; font-weight: bold; color: #f57c00; margin: 0.25rem 0;" id="promedio">-</p>
+          <p style="font-size: 0.9rem; color: #666;">Promedio Acumulado</p>
+          <p style="font-size: 0.85rem; color: #999; margin-top: 0.25rem;">
+            Estado: <strong id="estadoAcademico">Activo</strong>
+          </p>
+        </div>
       </div>
 
-      <div class="card">
-        <h3>💰 Estado Financiero</h3>
-        <p>Saldo: <span id="saldo">$0.00</span></p>
-        <p>Estado: <span id="estadoFinanciero">Al día</span></p>
-        <a href="/alumno/pagos" class="btn btn-primary">Ver Pagos</a>
+      <div class="stat-card">
+        <div class="card-icon" style="background: #e8f5e9;">
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#388e3c" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="12" y1="1" x2="12" y2="23"></line>
+            <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
+          </svg>
+        </div>
+        <div>
+          <h3>Estado Financiero</h3>
+          <p style="font-size: 1.5rem; font-weight: bold; color: #388e3c; margin: 0.25rem 0;" id="saldo">$0.00</p>
+          <p style="font-size: 0.9rem; color: #666;">Saldo Pendiente</p>
+          <p style="font-size: 0.85rem; color: #999; margin-top: 0.25rem;">
+            Estado: <strong id="estadoFinanciero">Al día</strong>
+          </p>
+        </div>
       </div>
     </div>
 
-    <hr>
+    <hr style="margin: 2rem 0; border: none; border-top: 1px solid #e0e0e0;">
 
-    <h3>🎯 Acciones Rápidas</h3>
-    <div class="quick-actions">
-      <a href="/alumno/materias" class="btn btn-primary">Inscribir Materias</a>
-      <a href="/alumno/horario" class="btn btn-primary">Ver Mi Horario</a>
-      <a href="/alumno/calificaciones" class="btn btn-primary">Descargar Reporte</a>
+    <h3 style="color: #1e3c72; margin-bottom: 1rem;">📚 Mis Materias Inscritas</h3>
+    <div id="materiasContainer" style="margin-bottom: 2rem;">
+      <p style="text-align: center; color: #999; padding: 2rem;">Cargando materias...</p>
+    </div>
+
+    <div style="margin-top: 2rem; padding: 1.5rem; background: #f8f9fa; border-radius: 8px; border-left: 4px solid #1976d2;">
+      <h3 style="color: #1976d2; margin-bottom: 1rem;">💡 Información</h3>
+      <p style="color: #666; line-height: 1.6;">
+        Usa el menú superior para navegar entre las diferentes secciones:
+        <strong>Mis Materias</strong>, <strong>Calificaciones</strong> y <strong>Pagos</strong>.
+      </p>
     </div>
   </div>
 
-  <script src="/js/alumno/dashboard.js"></script>
+  <script src="/js/alumno/dashboard.js?v=4"></script>
 </body>
 </html>

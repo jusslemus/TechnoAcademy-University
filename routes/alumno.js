@@ -21,14 +21,14 @@ router.get('/materias', (req, res) => {
   res.sendFile(path.join(__dirname, '../views/alumno/materias.html'));
 });
 
+// Mis Materias Inscritas (nuevo enlace del menú)
+router.get('/mis-materias', (req, res) => {
+  res.sendFile(path.join(__dirname, '../views/alumno/materias.html'));
+});
+
 // Mis Calificaciones
 router.get('/calificaciones', (req, res) => {
   res.sendFile(path.join(__dirname, '../views/alumno/calificaciones.html'));
-});
-
-// Mi Horario
-router.get('/horario', (req, res) => {
-  res.sendFile(path.join(__dirname, '../views/alumno/horario.html'));
 });
 
 // Mis Pagos
@@ -42,16 +42,39 @@ router.get('/pagos', (req, res) => {
 router.get('/api/info', async (req, res) => {
   try {
     const id_usuario = req.session.usuario.id;
-    const alumno = await alumnoModel.getAlumnoInfo(id_usuario);
+    const alumno = await alumnoModel.getAlumnoInfoCompleta(id_usuario);
     
     if (!alumno) {
-      return res.status(404).json({ error: 'Alumno no encontrado' });
+      return res.status(404).json({ success: false, error: 'Alumno no encontrado' });
     }
 
-    res.json(alumno);
+    res.json({ success: true, alumno });
   } catch (err) {
     console.error('Error obteniendo info del alumno:', err);
-    res.status(500).json({ error: 'Error al obtener información' });
+    res.status(500).json({ success: false, error: 'Error al obtener información' });
+  }
+});
+
+// ---- MIS MATERIAS INSCRITAS ----
+router.get('/api/mis-materias', async (req, res) => {
+  try {
+    const id_usuario = req.session.usuario.id;
+    
+    // Obtener id_alumno
+    const alumno = await db.fetchOne(
+      `SELECT id_alumno FROM alumnos WHERE id_usuario = :id_usuario`,
+      { id_usuario }
+    );
+
+    if (!alumno) {
+      return res.status(404).json({ success: false, error: 'Alumno no encontrado' });
+    }
+
+    const materias = await alumnoModel.getMisMateriasInscritas(alumno.ID_ALUMNO);
+    res.json({ success: true, materias });
+  } catch (err) {
+    console.error('Error obteniendo materias inscritas:', err);
+    res.status(500).json({ success: false, error: 'Error al obtener materias' });
   }
 });
 
@@ -157,46 +180,6 @@ router.get('/api/calificaciones', async (req, res) => {
   }
 });
 
-// ---- HORARIO ----
-router.get('/api/horario', async (req, res) => {
-  try {
-    const id_usuario = req.session.usuario.id;
-    
-    // Obtener id_alumno
-    const alumno = await db.fetchOne(
-      `SELECT id_alumno FROM alumnos WHERE id_usuario = :id_usuario`,
-      { id_usuario }
-    );
-
-    if (!alumno) {
-      return res.status(404).json({ error: 'Alumno no encontrado' });
-    }
-
-    // Obtener grupos en los que está inscrito
-    const horario = await db.fetchQuery(
-      `SELECT 
-         m.nombre_materia,
-         m.codigo_materia,
-         g.numero_grupo,
-         g.horario,
-         g.aula,
-         d.nombres || ' ' || d.apellidos as docente
-       FROM inscripciones i
-       JOIN grupos g ON i.id_grupo = g.id_grupo
-       JOIN materias m ON g.id_materia = m.id_materia
-       LEFT JOIN docentes d ON g.id_docente = d.id_docente
-       WHERE i.id_alumno = :id_alumno
-       ORDER BY g.horario`,
-      { id_alumno: alumno.ID_ALUMNO }
-    );
-
-    res.json(horario);
-  } catch (err) {
-    console.error('Error obteniendo horario:', err);
-    res.status(500).json({ error: 'Error al obtener horario' });
-  }
-});
-
 // ---- PAGOS ----
 router.get('/api/pagos', async (req, res) => {
   try {
@@ -213,7 +196,7 @@ router.get('/api/pagos', async (req, res) => {
     }
 
     const pagos = await db.fetchQuery(
-      `SELECT * FROM pagos WHERE id_alumno = :id_alumno ORDER BY fecha_vencimiento DESC`,
+      `SELECT * FROM pagos WHERE id_alumno = :id_alumno ORDER BY fecha_pago DESC`,
       { id_alumno: alumno.ID_ALUMNO }
     );
 

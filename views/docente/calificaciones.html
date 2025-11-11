@@ -1,0 +1,195 @@
+﻿<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Calificaciones - TechnoAcademy</title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+  <nav class="navbar">
+    <div class="nav-container">
+      <div class="nav-brand">
+        <svg class="logo-icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M22 10v6M2 10l10-5 10 5-10 5z"></path>
+          <path d="M6 12v5c3 3 9 3 12 0v-5"></path>
+        </svg>
+        <h1>TechnoAcademy - Docente</h1>
+      </div>
+      <ul class="nav-menu">
+        <li><a href="/docente/dashboard">Dashboard</a></li>
+        <li><a href="/docente/mis-materias">Mis Materias</a></li>
+        <li><a href="/docente/calificaciones" class="active">Calificaciones</a></li>
+        <li><a href="/logout">Cerrar Sesión</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <div class="container">
+    <div id="notification" style="display:none;padding:1rem;border-radius:5px;margin-bottom:1rem;"></div>
+    
+    <div style="margin-bottom: 2rem;">
+      <h2 style="color: #1e3c72; margin-bottom: 0.5rem;"> Resumen de Calificaciones</h2>
+      <p style="color: #666;">Vista completa de todos los alumnos inscritos en tus materias</p>
+    </div>
+
+    <!-- Filtros de Búsqueda -->
+    <div class="form-section" style="background: #f8f9fa; padding: 1.5rem; margin-bottom: 2rem;">
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1rem; align-items: end;">
+        <div class="form-group" style="margin-bottom: 0;">
+          <label for="searchAlumno"> Buscar Alumno:</label>
+          <input type="text" id="searchAlumno" placeholder="Nombre, carnet o email..." style="width: 100%;">
+        </div>
+        
+        <div class="form-group" style="margin-bottom: 0;">
+          <label for="filterMateria"> Filtrar por Materia:</label>
+          <select id="filterMateria" style="width: 100%;">
+            <option value="">Todas las materias</option>
+          </select>
+        </div>
+        
+        <div class="form-group" style="margin-bottom: 0;">
+          <label for="filterEstado"> Filtrar por Estado:</label>
+          <select id="filterEstado" style="width: 100%;">
+            <option value="">Todos los estados</option>
+            <option value="APROBADO"> Aprobados ( 6.0)</option>
+            <option value="RIESGO"> En Riesgo (< 6.0)</option>
+            <option value="SIN_NOTA"> Sin Calificación</option>
+          </select>
+        </div>
+        
+        <div style="display: flex; gap: 0.5rem;">
+          <button onclick="aplicarFiltros()" class="btn btn-primary" style="flex: 1;">
+             Buscar
+          </button>
+          <button onclick="limpiarFiltros()" class="btn btn-secondary" style="flex: 1;">
+             Limpiar
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Estadísticas Rápidas -->
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-bottom: 2rem;">
+      <div class="stat-card" style="border-left: 4px solid #1976d2;">
+        <h4 style="color: #1976d2; margin: 0 0 0.5rem 0;">Total Alumnos</h4>
+        <p style="font-size: 2rem; font-weight: bold; color: #1976d2; margin: 0;" id="statTotal">0</p>
+      </div>
+      
+      <div class="stat-card" style="border-left: 4px solid #28a745;">
+        <h4 style="color: #28a745; margin: 0 0 0.5rem 0;">Aprobados</h4>
+        <p style="font-size: 2rem; font-weight: bold; color: #28a745; margin: 0;" id="statAprobados">0</p>
+      </div>
+      
+      <div class="stat-card" style="border-left: 4px solid #f57c00;">
+        <h4 style="color: #f57c00; margin: 0 0 0.5rem 0;">En Riesgo</h4>
+        <p style="font-size: 2rem; font-weight: bold; color: #f57c00; margin: 0;" id="statRiesgo">0</p>
+      </div>
+      
+      <div class="stat-card" style="border-left: 4px solid #7b1fa2;">
+        <h4 style="color: #7b1fa2; margin: 0 0 0.5rem 0;">Promedio General</h4>
+        <p style="font-size: 2rem; font-weight: bold; color: #7b1fa2; margin: 0;" id="statPromedio">-</p>
+      </div>
+    </div>
+
+    <!-- Tabla de Calificaciones -->
+    <div class="table-section">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+        <h3 style="margin: 0; color: #1e3c72;">Calificaciones Detalladas</h3>
+      </div>
+      
+      <div style="overflow-x: auto;">
+        <table class="table">
+          <thead>
+            <tr>
+              <th>Carnet</th>
+              <th>Alumno</th>
+              <th>Materia</th>
+              <th>Grupo</th>
+              <th>P1</th>
+              <th>P2</th>
+              <th>P3</th>
+              <th>P4</th>
+              <th>Nota Final</th>
+              <th>Estado</th>
+              <th>Acciones</th>
+            </tr>
+          </thead>
+          <tbody id="calificacionesTable">
+            <tr>
+              <td colspan="11" style="text-align: center; padding: 2rem; color: #999;">
+                Cargando calificaciones...
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal para Editar Notas -->
+  <div id="editarNotasModal" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.5);z-index:1000;justify-content:center;align-items:center;">
+    <div style="background:white;padding:0;border-radius:10px;max-width:600px;width:90%;max-height:90vh;overflow-y:auto;">
+      <div style="display:flex;justify-content:space-between;align-items:center;padding:1.5rem;border-bottom:1px solid #eee;background:#1e3c72;color:white;border-radius:10px 10px 0 0;">
+        <h3 style="margin:0;"> Editar Calificaciones</h3>
+        <span onclick="cerrarModal()" style="font-size:2rem;cursor:pointer;line-height:1;">&times;</span>
+      </div>
+      
+      <form id="editarNotasForm" style="padding:1.5rem;">
+        <input type="hidden" id="edit_id_inscripcion">
+        
+        <div style="background: #f8f9fa; padding: 1rem; border-radius: 5px; margin-bottom: 1rem;">
+          <p style="margin: 0.25rem 0;"><strong>Alumno:</strong> <span id="modal_alumno"></span></p>
+          <p style="margin: 0.25rem 0;"><strong>Materia:</strong> <span id="modal_materia"></span></p>
+          <p style="margin: 0.25rem 0;"><strong>Grupo:</strong> <span id="modal_grupo"></span></p>
+        </div>
+        
+        <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem; margin-bottom: 1rem;">
+          <div class="form-group">
+            <label for="edit_nota_p1">Periodo 1 (P1):</label>
+            <input type="number" id="edit_nota_p1" min="0" max="10" step="0.01" placeholder="0.00">
+          </div>
+          
+          <div class="form-group">
+            <label for="edit_nota_p2">Periodo 2 (P2):</label>
+            <input type="number" id="edit_nota_p2" min="0" max="10" step="0.01" placeholder="0.00">
+          </div>
+          
+          <div class="form-group">
+            <label for="edit_nota_p3">Periodo 3 (P3):</label>
+            <input type="number" id="edit_nota_p3" min="0" max="10" step="0.01" placeholder="0.00">
+          </div>
+          
+          <div class="form-group">
+            <label for="edit_nota_p4">Periodo 4 (P4):</label>
+            <input type="number" id="edit_nota_p4" min="0" max="10" step="0.01" placeholder="0.00">
+          </div>
+        </div>
+        
+        <div style="background: #e3f2fd; padding: 1rem; border-radius: 5px; margin-bottom: 1rem; text-align: center;">
+          <p style="margin: 0; font-size: 0.9rem; color: #666;">Nota Final Calculada:</p>
+          <p style="margin: 0.25rem 0 0 0; font-size: 2rem; font-weight: bold; color: #1976d2;" id="modal_nota_final">0.00</p>
+        </div>
+        
+        <div style="border-top:1px solid #eee;padding-top:1rem;display:flex;gap:1rem;">
+          <button type="button" class="btn btn-secondary" onclick="cerrarModal()" style="flex: 1;">Cancelar</button>
+          <button type="submit" class="btn btn-primary" style="flex: 1;"> Guardar Notas</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script src="/js/docente/calificaciones.js?v=2"></script>
+  
+  <style>
+    .notification.success{background:#d4edda;border-left:4px solid #28a745;color:#155724;}
+    .notification.error{background:#f8d7da;border-left:4px solid #dc3545;color:#721c24;}
+    .badge{padding:4px 10px;border-radius:12px;font-size:0.85rem;font-weight:500;}
+    .badge-success{background:#d4edda;color:#155724;}
+    .badge-warning{background:#fff3cd;color:#856404;}
+    .badge-danger{background:#f8d7da;color:#721c24;}
+    .badge-secondary{background:#e2e3e5;color:#383d41;}
+    .btn-small{padding:0.4rem 0.8rem;font-size:0.85rem;margin-right:0.3rem;}
+  </style>
+</body>
+</html>

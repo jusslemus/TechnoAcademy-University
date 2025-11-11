@@ -37,11 +37,10 @@ function mostrarDocentes(docentes) {
     return;
   }
   
-  tbody.innerHTML = docentes.map(docente => {
+  tbody.innerHTML = docentes.map((docente, index) => {
     const nombreCompleto = `${docente.NOMBRES || ""} ${docente.APELLIDOS || ""}`;
     const badgeClass = docente.ESTADO === "ACTIVO" ? "badge-success" : "badge-inactive";
     const usuario = docente.NOMBRE_USUARIO || "Sin usuario";
-    const docenteStr = JSON.stringify(docente).replace(/"/g, "&quot;");
     
     return `
       <tr>
@@ -53,16 +52,22 @@ function mostrarDocentes(docentes) {
         <td>${usuario}</td>
         <td><span class="badge ${badgeClass}">${docente.ESTADO || "ACTIVO"}</span></td>
         <td>
-          <button class="btn btn-small btn-warning" onclick="abrirModalEditar(JSON.parse(decodeURIComponent('"'"'${encodeURIComponent(docenteStr)}'"'"')))">
+          <button class="btn btn-small btn-warning" onclick="abrirModalEditarPorId(${index})">
              Editar
           </button>
-          <button class="btn btn-small btn-danger" onclick="eliminarDocente(${docente.ID_DOCENTE}, '"'"'${nombreCompleto.replace(/'"'"'/g, "")}'"'"')">
+          <button class="btn btn-small btn-danger" onclick="eliminarDocente(${docente.ID_DOCENTE})">
              Eliminar
           </button>
         </td>
       </tr>
     `;
   }).join("");
+}
+
+// ===== ABRIR MODAL EDITAR POR ÍNDICE =====
+function abrirModalEditarPorId(index) {
+  const docente = todosLosDocentes[index];
+  abrirModalEditar(docente);
 }
 
 // ===== CREAR DOCENTE =====
@@ -186,7 +191,10 @@ async function guardarEdicion(e) {
 }
 
 // ===== ELIMINAR DOCENTE =====
-async function eliminarDocente(id, nombre) {
+async function eliminarDocente(id) {
+  const docente = todosLosDocentes.find(d => d.ID_DOCENTE === id);
+  const nombre = docente ? `${docente.NOMBRES} ${docente.APELLIDOS}` : "este docente";
+  
   if (!confirm(`¿Está seguro de eliminar al docente "${nombre}"?\n\nEsta acción no se puede deshacer.`)) {
     return;
   }

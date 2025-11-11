@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mis Materias - TechnoAcademy</title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+  <nav class="navbar">
+    <div class="nav-container">
+      <div class="nav-brand">
+        <svg class="logo-icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M22 10v6M2 10l10-5 10 5-10 5z"></path>
+          <path d="M6 12v5c3 3 9 3 12 0v-5"></path>
+        </svg>
+        <h1>TechnoAcademy - Docente</h1>
+      </div>
+      <ul class="nav-menu">
+        <li><a href="/docente/dashboard">Dashboard</a></li>
+        <li><a href="/docente/mis-materias" class="active">Mis Materias</a></li>
+        <li><a href="/docente/calificaciones">Calificaciones</a></li>
+        <li><a href="/logout">Cerrar Sesión</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <div class="container">
+    <div id="notification" style="display:none;padding:1rem;border-radius:5px;margin-bottom:1rem;"></div>
+    
+    <h2 style="color: #1e3c72; margin-bottom: 1rem;">Gestión de Materias y Alumnos</h2>
+    
+    <div id="materiasContainer">
+      <p style="text-align: center; color: #999; padding: 2rem;">Cargando materias...</p>
+    </div>
+  </div>
+
+  <!-- Modal Agregar Alumno -->
+  <div id="agregarAlumnoModal" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.5);z-index:1000;justify-content:center;align-items:center;">
+    <div style="background:white;padding:0;border-radius:10px;max-width:600px;width:90%;max-height:90vh;overflow-y:auto;">
+      <div style="display:flex;justify-content:space-between;align-items:center;padding:1.5rem;border-bottom:1px solid #eee;">
+        <h3 style="margin:0;color:#1e3c72;">Inscribir Alumno</h3>
+        <span onclick="cerrarModalAgregar()" style="font-size:2rem;cursor:pointer;color:#666;line-height:1;">&times;</span>
+      </div>
+      <div style="padding:1.5rem;">
+        <input type="hidden" id="modal_id_grupo">
+        <div class="form-group">
+          <label for="select_alumno">Seleccionar Alumno:</label>
+          <select id="select_alumno" style="width:100%;padding:0.75rem;border:1px solid #c8d0d8;border-radius:5px;">
+            <option value="">-- Cargando alumnos --</option>
+          </select>
+        </div>
+        <div style="border-top:1px solid #eee;padding-top:1rem;display:flex;gap:1rem;justify-content:flex-end;margin-top:1rem;">
+          <button type="button" class="btn btn-secondary" onclick="cerrarModalAgregar()">Cancelar</button>
+          <button type="button" class="btn btn-primary" onclick="inscribirAlumno()">Inscribir</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal Notas por Período -->
+  <div id="notasModal" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.5);z-index:1000;justify-content:center;align-items:center;">
+    <div style="background:white;padding:0;border-radius:10px;max-width:700px;width:90%;max-height:90vh;overflow-y:auto;">
+      <div style="display:flex;justify-content:space-between;align-items:center;padding:1.5rem;border-bottom:1px solid #eee;">
+        <div>
+          <h3 style="margin:0;color:#1e3c72;">Notas por Período</h3>
+          <p style="margin:0.5rem 0 0 0;font-size:0.9rem;color:#666;" id="notasAlumnoNombre"></p>
+        </div>
+        <span onclick="cerrarModalNotas()" style="font-size:2rem;cursor:pointer;color:#666;line-height:1;">&times;</span>
+      </div>
+      <div style="padding:1.5rem;">
+        <input type="hidden" id="notas_id_inscripcion">
+        
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:1rem;margin-bottom:1rem;">
+          <div class="form-group">
+            <label for="nota_p1">Período 1:</label>
+            <input type="number" id="nota_p1" class="calificacion-input" min="0" max="10" step="0.01" placeholder="0.00">
+          </div>
+          <div class="form-group">
+            <label for="nota_p2">Período 2:</label>
+            <input type="number" id="nota_p2" class="calificacion-input" min="0" max="10" step="0.01" placeholder="0.00">
+          </div>
+          <div class="form-group">
+            <label for="nota_p3">Período 3:</label>
+            <input type="number" id="nota_p3" class="calificacion-input" min="0" max="10" step="0.01" placeholder="0.00">
+          </div>
+          <div class="form-group">
+            <label for="nota_p4">Período 4:</label>
+            <input type="number" id="nota_p4" class="calificacion-input" min="0" max="10" step="0.01" placeholder="0.00">
+          </div>
+        </div>
+
+        <div style="background:#f8f9fa;padding:1rem;border-radius:5px;margin-bottom:1rem;">
+          <p style="margin:0;font-size:0.9rem;color:#666;">
+            <strong>Nota Final (Promedio):</strong> 
+            <span id="nota_final_calculada" style="font-size:1.2rem;color:#1e3c72;font-weight:bold;margin-left:0.5rem;">-</span>
+          </p>
+        </div>
+
+        <div style="background:#fff3cd;padding:1rem;border-radius:5px;border-left:4px solid #ffc107;margin-bottom:1rem;">
+          <p style="margin:0;font-size:0.85rem;color:#856404;">
+            <strong>Nota:</strong> La nota final se calcula automáticamente como el promedio de todos los períodos ingresados.
+          </p>
+        </div>
+
+        <div style="border-top:1px solid #eee;padding-top:1rem;display:flex;gap:1rem;justify-content:flex-end;">
+          <button type="button" class="btn btn-secondary" onclick="cerrarModalNotas()">Cancelar</button>
+          <button type="button" class="btn btn-primary" onclick="guardarNotas()">Guardar Notas</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="/js/docente/mis-materias.js?v=3"></script>
+  
+  <style>
+    .notification.success{background:#d4edda;border-left:4px solid #28a745;color:#155724;}
+    .notification.error{background:#f8d7da;border-left:4px solid #dc3545;color:#721c24;}
+    
+    .materia-card {
+      background: white;
+      border: 1px solid #e0e0e0;
+      border-radius: 8px;
+      padding: 1.5rem;
+      margin-bottom: 1.5rem;
+      border-left: 4px solid #1e3c72;
+    }
+    
+    .materia-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: start;
+      margin-bottom: 1rem;
+    }
+    
+    .alumnos-list {
+      margin-top: 1rem;
+    }
+    
+    .alumno-item {
+      display: grid;
+      grid-template-columns: 2fr 1fr auto;
+      gap: 1rem;
+      align-items: center;
+      padding: 0.75rem;
+      background: #f8f9fa;
+      border-radius: 5px;
+      margin-bottom: 0.5rem;
+    }
+    
+    .badge {
+      padding: 4px 10px;
+      border-radius: 12px;
+      font-size: 0.85rem;
+      font-weight: 500;
+      display: inline-block;
+    }
+    
+    .badge-success { background: #d4edda; color: #155724; }
+    .badge-warning { background: #fff3cd; color: #856404; }
+    .badge-danger { background: #f8d7da; color: #721c24; }
+    
+    .btn-small {
+      padding: 0.4rem 0.8rem;
+      font-size: 0.85rem;
+      margin-right: 0.3rem;
+    }
+    
+    .calificacion-input {
+      width: 100%;
+      padding: 0.5rem;
+      border: 1px solid #c8d0d8;
+      border-radius: 5px;
+      text-align: center;
+    }
+  </style>
+</body>
+</html>

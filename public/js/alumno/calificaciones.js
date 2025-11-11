@@ -1,84 +1,118 @@
-// Mis Calificaciones - Alumno
-document.addEventListener('DOMContentLoaded', function() {
+﻿// ============================================
+// CALIFICACIONES ALUMNO - TECHNOACADEMY
+// ============================================
+
+let misCalificaciones = [];
+
+document.addEventListener("DOMContentLoaded", function() {
   cargarCalificaciones();
-  cargarPeriodos();
 });
 
-function cargarPeriodos() {
-  fetch('/alumno/api/periodos')
-    .then(res => res.json())
-    .then(data => {
-      const select = document.getElementById('selectPeriodo');
-      select.innerHTML = '<option value="">Todos los períodos</option>';
-      
-      data.forEach(periodo => {
-        const option = document.createElement('option');
-        option.value = periodo.ID_PERIODO;
-        option.textContent = periodo.NOMBRE_PERIODO;
-        select.appendChild(option);
-      });
-    })
-    .catch(err => console.error('Error cargando períodos:', err));
-}
-
-function cargarCalificaciones() {
-  fetch('/alumno/api/calificaciones')
-    .then(res => res.json())
-    .then(data => {
-      const tbody = document.getElementById('calificacionesTable');
-      tbody.innerHTML = '';
-      
-      if (data.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="6" style="text-align: center;">Sin calificaciones registradas</td></tr>';
-        return;
-      }
-
-      let totalNotas = 0;
-      let materiasAprobadas = 0;
-      let materiasReprobadas = 0;
-
-      data.forEach(cal => {
-        const nota = parseFloat(cal.NOTA_FINAL) || 0;
-        totalNotas += nota;
-        
-        if (nota >= 3.0) {
-          materiasAprobadas++;
-        } else if (nota > 0) {
-          materiasReprobadas++;
-        }
-
-        const estado = nota >= 3.0 ? '<span style="color: green; font-weight: bold;">✓ Aprobado</span>' : 
-                       nota > 0 ? '<span style="color: red; font-weight: bold;">✗ Reprobado</span>' : 'Sin nota';
-
-        const row = `
-          <tr>
-            <td>${cal.CODIGO_MATERIA || '-'}</td>
-            <td>${cal.NOMBRE_MATERIA || '-'}</td>
-            <td>${cal.CREDITOS || '-'}</td>
-            <td>${cal.DOCENTE || '-'}</td>
-            <td style="font-weight: bold;">${nota.toFixed(2)}</td>
-            <td>${estado}</td>
-          </tr>
-        `;
-        tbody.innerHTML += row;
-      });
-
-      // Actualizar resumen
-      const promedio = data.length > 0 ? (totalNotas / data.length).toFixed(2) : 0;
-      document.getElementById('promedioGeneral').textContent = promedio;
-      document.getElementById('materiasAprobadas').textContent = materiasAprobadas;
-      document.getElementById('materiasReprobadas').textContent = materiasReprobadas;
-    })
-    .catch(err => {
-      console.error('Error:', err);
-      document.getElementById('calificacionesTable').innerHTML = '<tr><td colspan="6" style="text-align: center; color: red;">Error al cargar calificaciones</td></tr>';
-    });
-}
-
-function filtrarCalificaciones() {
-  const periodo = document.getElementById('selectPeriodo').value;
-  if (periodo) {
-    console.log('Filtrar por período:', periodo);
+async function cargarCalificaciones() {
+  try {
+    const response = await fetch("/alumno/api/mis-materias");
+    const data = await response.json();
+    
+    if (data.success && data.materias) {
+      misCalificaciones = data.materias;
+      mostrarCalificaciones(misCalificaciones);
+      actualizarEstadisticas(misCalificaciones);
+    } else {
+      mostrarError("No se pudieron cargar las calificaciones");
+    }
+  } catch (error) {
+    console.error("Error cargando calificaciones:", error);
+    mostrarError("Error al cargar las calificaciones");
   }
-  cargarCalificaciones();
+}
+
+function mostrarCalificaciones(calificaciones) {
+  const tbody = document.getElementById("calificacionesTable");
+  
+  if (calificaciones.length === 0) {
+    tbody.innerHTML = `
+      <tr>
+        <td colspan="8" style="text-align: center; padding: 2rem; color: #999;">
+           No tienes calificaciones registradas
+        </td>
+      </tr>
+    `;
+    return;
+  }
+  
+  tbody.innerHTML = calificaciones.map(cal => {
+    const p1 = cal.NOTA_P1 ? parseFloat(cal.NOTA_P1).toFixed(2) : "-";
+    const p2 = cal.NOTA_P2 ? parseFloat(cal.NOTA_P2).toFixed(2) : "-";
+    const p3 = cal.NOTA_P3 ? parseFloat(cal.NOTA_P3).toFixed(2) : "-";
+    const p4 = cal.NOTA_P4 ? parseFloat(cal.NOTA_P4).toFixed(2) : "-";
+    const notaFinal = cal.NOTA_FINAL ? parseFloat(cal.NOTA_FINAL).toFixed(2) : "-";
+    
+    let estadoBadge, estadoTexto;
+    if (!cal.NOTA_FINAL) {
+      estadoBadge = "badge-secondary";
+      estadoTexto = "Sin Calificar";
+    } else if (cal.NOTA_FINAL >= 6) {
+      estadoBadge = "badge-success";
+      estadoTexto = " Aprobado";
+    } else {
+      estadoBadge = "badge-danger";
+      estadoTexto = " Reprobado";
+    }
+    
+    return `
+      <tr>
+        <td><strong>${cal.CODIGO_MATERIA || "-"}</strong></td>
+        <td>${cal.NOMBRE_MATERIA}</td>
+        <td style="text-align: center;">${p1}</td>
+        <td style="text-align: center;">${p2}</td>
+        <td style="text-align: center;">${p3}</td>
+        <td style="text-align: center;">${p4}</td>
+        <td style="text-align: center;"><strong style="color: #1976d2; font-size: 1.1rem;">${notaFinal}</strong></td>
+        <td><span class="badge ${estadoBadge}">${estadoTexto}</span></td>
+      </tr>
+    `;
+  }).join("");
+}
+
+function actualizarEstadisticas(calificaciones) {
+  const total = calificaciones.length;
+  let aprobadas = 0;
+  let reprobadas = 0;
+  let sumaNotas = 0;
+  let contadorNotas = 0;
+  
+  calificaciones.forEach(cal => {
+    if (cal.NOTA_FINAL) {
+      contadorNotas++;
+      sumaNotas += parseFloat(cal.NOTA_FINAL);
+      
+      if (cal.NOTA_FINAL >= 6) {
+        aprobadas++;
+      } else {
+        reprobadas++;
+      }
+    }
+  });
+  
+  document.getElementById("statTotal").textContent = total;
+  document.getElementById("statAprobadas").textContent = aprobadas;
+  document.getElementById("statReprobadas").textContent = reprobadas;
+  
+  if (contadorNotas > 0) {
+    const promedio = (sumaNotas / contadorNotas).toFixed(2);
+    document.getElementById("statPromedio").textContent = promedio;
+  } else {
+    document.getElementById("statPromedio").textContent = "-";
+  }
+}
+
+function mostrarError(mensaje) {
+  const tbody = document.getElementById("calificacionesTable");
+  tbody.innerHTML = `
+    <tr>
+      <td colspan="8" style="text-align: center; padding: 2rem; color: #dc3545;">
+         ${mensaje}
+      </td>
+    </tr>
+  `;
 }
