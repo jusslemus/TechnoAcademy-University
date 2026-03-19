@@ -22,8 +22,8 @@ app.use(session({
   secret: process.env.SESSION_SECRET || 'clave_temporal_cambiar_en_produccion',
   resave: false,
   saveUninitialized: true,
-  cookie: {
-    secure: process.env.NODE_ENV === 'production',
+ cookie: {
+    secure: false,
     httpOnly: true,
     maxAge: 3600000 // 1 hora
   }
